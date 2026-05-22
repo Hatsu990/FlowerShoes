@@ -23,6 +23,12 @@ TURSO_DATABASE_URL=libsql://...
 TURSO_AUTH_TOKEN=...
 ```
 
+`DATABASE_URL`은 사용하지 않습니다. (Prisma 미사용)
+
+## Vercel 환경 변수 (Production/Preview)
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`
+
 ## 빠른 시작
 1) 의존성 설치
 ```bash
