@@ -1,19 +1,27 @@
-﻿# FlowerShoes MVP (홍천 꽃신)
+# FlowerShoes MVP (홍천 꽃신)
 
-홍천 꽃신 웹사이트 MVP입니다.
+홍천 꽃신 예약 시스템 MVP입니다.
 
 현재 범위:
 - 이미지 중심 랜딩 페이지
 - 예약 요청 폼
-- 예약 데이터 저장(SQLite + Prisma)
+- Turso DB(libSQL) 저장
 - 관리자 예약 목록/상세/상태 변경
 - 추후 자동화 확장을 위한 이벤트 디스패처 구조
 
 ## 기술 스택
 - Next.js (App Router)
 - TypeScript
-- Prisma
-- SQLite
+- Turso (libSQL)
+- @libsql/client
+
+## 환경 변수
+`.env` 파일에 아래 값이 필요합니다.
+
+```env
+TURSO_DATABASE_URL=libsql://...
+TURSO_AUTH_TOKEN=...
+```
 
 ## 빠른 시작
 1) 의존성 설치
@@ -21,9 +29,9 @@
 npm install
 ```
 
-2) DB 스키마 반영
+2) 예약 테이블 생성
 ```bash
-npm run db:push
+npm run db:init
 ```
 
 3) 샘플 데이터(선택)
@@ -43,19 +51,18 @@ npm run dev
 
 ## 주요 스크립트
 - `npm run dev`: 개발 서버
-- `npm run build`: Prisma generate + Next 빌드
+- `npm run build`: 프로덕션 빌드
 - `npm run start`: 프로덕션 서버
-- `npm run db:push`: DB 스키마 즉시 반영(MVP 권장)
-- `npm run db:migrate`: 마이그레이션 생성+적용
+- `npm run db:init`: Turso 예약 테이블/인덱스 생성
 - `npm run db:seed`: 샘플 예약 데이터 생성
-- `npm run db:studio`: Prisma Studio 실행
 
 ## 폴더 구조
 - `app/`: 페이지 + API 라우트
 - `components/`: UI 컴포넌트
+- `lib/db`: Turso 클라이언트 + 스키마/초기화
 - `lib/reservations`: 예약 도메인 로직(검증/서비스/저장소)
 - `lib/automation`: 자동화 이벤트 확장 포인트
-- `prisma/`: DB 스키마/시드
+- `scripts/`: DB 초기화/시드 스크립트
 - `docs/`: 기획/디자인 참고 문서
 - `assets/image-pool/raw`: 실제 이미지 에셋 투입 폴더
 

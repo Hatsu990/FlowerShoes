@@ -26,7 +26,7 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
   const phone = toTrimmedString(payload.phone);
   const date = toTrimmedString(payload.date);
   const time = toTrimmedString(payload.time);
-  const partySizeRaw = payload.partySize;
+  const peopleRaw = payload.people ?? payload.partySize;
   const memo = toTrimmedString(payload.memo);
   const errors: string[] = [];
 
@@ -43,8 +43,8 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
     errors.push("시간 형식이 올바르지 않습니다. (HH:MM)");
   }
 
-  const partySize = Number(partySizeRaw);
-  if (!Number.isInteger(partySize) || partySize < 1 || partySize > 20) {
+  const people = Number(peopleRaw);
+  if (!Number.isInteger(people) || people < 1 || people > 20) {
     errors.push("인원 수는 1~20명 사이로 입력해주세요.");
   }
   if (memo.length > 500) {
@@ -62,7 +62,7 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
       phone,
       date,
       time,
-      partySize,
+      people,
       memo: memo || undefined,
     },
   };

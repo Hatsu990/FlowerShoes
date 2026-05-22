@@ -1,7 +1,10 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 import { createReservation, listReservations } from "@/lib/reservations/service";
 import { parseReservationStatus } from "@/lib/reservations/validation";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

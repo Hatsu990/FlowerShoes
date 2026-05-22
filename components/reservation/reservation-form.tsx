@@ -9,7 +9,7 @@ const initialFormState = {
   phone: "",
   date: "",
   time: "",
-  partySize: 2,
+  people: 2,
   memo: "",
 };
 
@@ -127,13 +127,13 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
           <input
             required
             type="number"
-            value={form.partySize}
+            value={form.people}
             min={1}
             max={20}
             onChange={(event) =>
               setForm((prev) => ({
                 ...prev,
-                partySize: Number(event.target.value),
+                people: Number(event.target.value),
               }))
             }
           />

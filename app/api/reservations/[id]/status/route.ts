@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { updateReservationStatus } from "@/lib/reservations/service";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface RouteContext {
   params: Promise<{ id: string }>;
 }

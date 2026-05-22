@@ -6,7 +6,7 @@ export interface CreateReservationInput {
   phone: string;
   date: string;
   time: string;
-  partySize: number;
+  people: number;
   memo?: string;
 }
 
@@ -16,15 +16,10 @@ export interface Reservation {
   phone: string;
   date: string;
   time: string;
-  partySize: number;
+  people: number;
   memo: string | null;
   status: ReservationStatus;
-  source: string;
-  internalNote: string | null;
-  automationStatus: string | null;
-  lastNotifiedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
 }
 
 export interface ReservationListFilter {

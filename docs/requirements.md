@@ -1,4 +1,4 @@
-﻿# MVP Requirements Snapshot
+# MVP Requirements Snapshot
 
 ## 목표
 - 홍천 꽃신을 소개하는 랜딩 홈페이지
@@ -18,5 +18,5 @@
 
 ## 기술 선택 근거
 - Next.js: 페이지+API를 한 저장소에서 빠르게 구현
-- Prisma+SQLite: 빠른 로컬 MVP 데이터 저장
+- Turso(libSQL): 실제 클라우드 기반 예약 데이터 저장
 - TypeScript: 확장 및 유지보수 안정성

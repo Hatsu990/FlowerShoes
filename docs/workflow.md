@@ -1,4 +1,4 @@
-﻿# MVP Workflow
+# MVP Workflow
 
 ## 사용자 흐름
 1. 방문자가 홈페이지 진입
@@ -15,7 +15,7 @@
 ## 백엔드 흐름
 1. `POST /api/reservations` 요청 수신
 2. 입력 검증
-3. Prisma로 SQLite 저장
+3. Turso DB 저장
 4. 자동화 이벤트 디스패처 호출
 
 ## 향후 확장

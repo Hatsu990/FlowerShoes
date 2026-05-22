@@ -1,6 +1,7 @@
-import { ReservationStatus as PrismaReservationStatus } from "@prisma/client";
+import { randomUUID } from "node:crypto";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db/client";
+import { ensureDatabaseSchema } from "@/lib/db/init";
 import {
   CreateReservationInput,
   Reservation,
@@ -8,112 +9,135 @@ import {
   ReservationStatus,
 } from "@/lib/reservations/types";
 
-const toDbStatusMap: Record<ReservationStatus, PrismaReservationStatus> = {
-  pending: PrismaReservationStatus.PENDING,
-  confirmed: PrismaReservationStatus.CONFIRMED,
-  cancelled: PrismaReservationStatus.CANCELLED,
-};
+type SqlArg = string | number | null;
+type DbRow = Record<string, unknown>;
 
-const fromDbStatusMap: Record<PrismaReservationStatus, ReservationStatus> = {
-  PENDING: "pending",
-  CONFIRMED: "confirmed",
-  CANCELLED: "cancelled",
-};
+function parseStatus(value: unknown): ReservationStatus {
+  if (value === "pending" || value === "confirmed" || value === "cancelled") {
+    return value;
+  }
+  return "pending";
+}
 
-function mapReservation(record: {
-  id: string;
-  name: string;
-  phone: string;
-  date: string;
-  time: string;
-  partySize: number;
-  memo: string | null;
-  status: PrismaReservationStatus;
-  source: string;
-  internalNote: string | null;
-  automationStatus: string | null;
-  lastNotifiedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}): Reservation {
+function rowToReservation(row: DbRow): Reservation {
   return {
-    id: record.id,
-    name: record.name,
-    phone: record.phone,
-    date: record.date,
-    time: record.time,
-    partySize: record.partySize,
-    memo: record.memo,
-    status: fromDbStatusMap[record.status],
-    source: record.source,
-    internalNote: record.internalNote,
-    automationStatus: record.automationStatus,
-    lastNotifiedAt: record.lastNotifiedAt ? record.lastNotifiedAt.toISOString() : null,
-    createdAt: record.createdAt.toISOString(),
-    updatedAt: record.updatedAt.toISOString(),
+    id: String(row.id),
+    name: String(row.name),
+    phone: String(row.phone),
+    date: String(row.date),
+    time: String(row.time),
+    people: Number(row.people),
+    memo: row.memo == null ? null : String(row.memo),
+    status: parseStatus(row.status),
+    created_at: String(row.created_at),
   };
 }
 
 export async function createReservation(input: CreateReservationInput): Promise<Reservation> {
-  const reservation = await prisma.reservation.create({
-    data: {
-      name: input.name,
-      phone: input.phone,
-      date: input.date,
-      time: input.time,
-      partySize: input.partySize,
-      memo: input.memo?.trim() || null,
-      status: PrismaReservationStatus.PENDING,
-    },
+  await ensureDatabaseSchema();
+
+  const reservation: Reservation = {
+    id: randomUUID(),
+    name: input.name,
+    phone: input.phone,
+    date: input.date,
+    time: input.time,
+    people: input.people,
+    memo: input.memo?.trim() || null,
+    status: "pending",
+    created_at: new Date().toISOString(),
+  };
+
+  await db.execute({
+    sql: `
+      INSERT INTO reservations (id, name, phone, date, time, people, memo, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    args: [
+      reservation.id,
+      reservation.name,
+      reservation.phone,
+      reservation.date,
+      reservation.time,
+      reservation.people,
+      reservation.memo,
+      reservation.status,
+      reservation.created_at,
+    ],
   });
 
-  return mapReservation(reservation);
+  return reservation;
 }
 
 export async function listReservations(filter: ReservationListFilter = {}): Promise<Reservation[]> {
-  const limit = filter.limit ?? 100;
-  const reservations = await prisma.reservation.findMany({
-    where: {
-      status: filter.status ? toDbStatusMap[filter.status] : undefined,
-      OR: filter.query
-        ? [
-            { name: { contains: filter.query } },
-            { phone: { contains: filter.query } },
-            { memo: { contains: filter.query } },
-          ]
-        : undefined,
-    },
-    orderBy: [{ createdAt: "desc" }],
-    take: limit,
-  });
+  await ensureDatabaseSchema();
 
-  return reservations.map(mapReservation);
+  const limit = Math.max(1, Math.min(filter.limit ?? 100, 500));
+  const conditions: string[] = [];
+  const args: SqlArg[] = [];
+
+  if (filter.status) {
+    conditions.push("status = ?");
+    args.push(filter.status);
+  }
+
+  if (filter.query) {
+    conditions.push("(name LIKE ? OR phone LIKE ? OR COALESCE(memo, '') LIKE ?)");
+    const q = `%${filter.query}%`;
+    args.push(q, q, q);
+  }
+
+  let sql = `
+    SELECT id, name, phone, date, time, people, memo, status, created_at
+    FROM reservations
+  `;
+
+  if (conditions.length > 0) {
+    sql += ` WHERE ${conditions.join(" AND ")}`;
+  }
+
+  sql += " ORDER BY created_at DESC LIMIT ?";
+  args.push(limit);
+
+  const result = await db.execute({ sql, args });
+  return result.rows.map((row) => rowToReservation(row as DbRow));
 }
 
 export async function getReservationById(id: string): Promise<Reservation | null> {
-  const reservation = await prisma.reservation.findUnique({
-    where: { id },
+  await ensureDatabaseSchema();
+
+  const result = await db.execute({
+    sql: `
+      SELECT id, name, phone, date, time, people, memo, status, created_at
+      FROM reservations
+      WHERE id = ?
+      LIMIT 1
+    `,
+    args: [id],
   });
 
-  return reservation ? mapReservation(reservation) : null;
+  const row = result.rows[0];
+  if (!row) {
+    return null;
+  }
+
+  return rowToReservation(row as DbRow);
 }
 
 export async function updateReservationStatus(
   id: string,
   status: ReservationStatus,
 ): Promise<Reservation | null> {
-  const exists = await prisma.reservation.findUnique({
-    where: { id },
-    select: { id: true },
+  await ensureDatabaseSchema();
+
+  const result = await db.execute({
+    sql: "UPDATE reservations SET status = ? WHERE id = ?",
+    args: [status, id],
   });
-  if (!exists) {
+
+  if (!result.rowsAffected) {
     return null;
   }
 
-  const reservation = await prisma.reservation.update({
-    where: { id },
-    data: { status: toDbStatusMap[status] },
-  });
-
-  return mapReservation(reservation);
+  return getReservationById(id);
 }

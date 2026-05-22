@@ -3,6 +3,9 @@ import Link from "next/link";
 import { StatusSelector } from "@/components/admin/status-selector";
 import { listReservations } from "@/lib/reservations/service";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function formatDate(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleString("ko-KR", {
@@ -48,11 +51,11 @@ export default async function ReservationAdminPage() {
                 <td>{reservation.phone}</td>
                 <td>{reservation.date}</td>
                 <td>{reservation.time}</td>
-                <td>{reservation.partySize}명</td>
+                <td>{reservation.people}명</td>
                 <td>
                   <StatusSelector reservationId={reservation.id} currentStatus={reservation.status} />
                 </td>
-                <td>{formatDate(reservation.createdAt)}</td>
+                <td>{formatDate(reservation.created_at)}</td>
                 <td>
                   <Link href={`/admin/reservations/${reservation.id}`}>보기</Link>
                 </td>

@@ -5,12 +5,7 @@ import {
   listReservations as listReservationsRecord,
   updateReservationStatus as updateReservationStatusRecord,
 } from "@/lib/reservations/repository";
-import {
-  CreateReservationInput,
-  Reservation,
-  ReservationListFilter,
-  ReservationStatus,
-} from "@/lib/reservations/types";
+import { Reservation, ReservationListFilter, ReservationStatus } from "@/lib/reservations/types";
 import { parseReservationStatus, validateCreateReservationInput } from "@/lib/reservations/validation";
 
 export async function createReservation(rawInput: unknown): Promise<{ reservation?: Reservation; errors?: string[] }> {
@@ -19,7 +14,7 @@ export async function createReservation(rawInput: unknown): Promise<{ reservatio
     return { errors: validation.errors ?? ["유효하지 않은 요청입니다."] };
   }
 
-  const reservation = await createReservationRecord(validation.data as CreateReservationInput);
+  const reservation = await createReservationRecord(validation.data);
 
   await dispatchAutomationEvent({
     name: "reservation.created",

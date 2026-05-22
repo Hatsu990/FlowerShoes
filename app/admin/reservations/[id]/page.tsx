@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { StatusSelector } from "@/components/admin/status-selector";
 import { getReservationById } from "@/lib/reservations/service";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -61,7 +64,7 @@ export default async function ReservationDetailPage({ params }: PageProps) {
           </div>
           <div>
             <dt>인원</dt>
-            <dd>{reservation.partySize}명</dd>
+            <dd>{reservation.people}명</dd>
           </div>
           <div>
             <dt>요청사항</dt>
@@ -75,11 +78,7 @@ export default async function ReservationDetailPage({ params }: PageProps) {
           </div>
           <div>
             <dt>생성시각</dt>
-            <dd>{formatDate(reservation.createdAt)}</dd>
-          </div>
-          <div>
-            <dt>수정시각</dt>
-            <dd>{formatDate(reservation.updatedAt)}</dd>
+            <dd>{formatDate(reservation.created_at)}</dd>
           </div>
         </dl>
       </section>
