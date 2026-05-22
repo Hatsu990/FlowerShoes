@@ -29,6 +29,14 @@ TURSO_AUTH_TOKEN=...
 - `TURSO_DATABASE_URL`
 - `TURSO_AUTH_TOKEN`
 
+## Vercel 설정 체크
+- Root Directory: 저장소 루트(`.`)
+- Build Command: `npm run build`
+- Install Command: `npm install --include=optional --no-audit --no-fund` (vercel.json에 설정됨)
+
+배포 로그에 `schema.prisma` 또는 `DATABASE_URL` 오류가 보이면,
+현재 커밋이 아니라 이전 커밋/다른 루트 디렉터리를 빌드하고 있는 상태일 가능성이 큽니다.
+
 ## 빠른 시작
 1) 의존성 설치
 ```bash
