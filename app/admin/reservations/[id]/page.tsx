@@ -63,8 +63,8 @@ export default async function ReservationDetailPage({ params }: PageProps) {
             <dd>{reservation.time}</dd>
           </div>
           <div>
-            <dt>인원</dt>
-            <dd>{reservation.people}명</dd>
+            <dt>예약유형</dt>
+            <dd>{reservation.reservationType}</dd>
           </div>
           <div>
             <dt>요청사항</dt>

@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS reservations (
   phone TEXT NOT NULL,
   date TEXT NOT NULL,
   time TEXT NOT NULL,
-  people INTEGER NOT NULL CHECK (people >= 1),
+  people INTEGER NOT NULL DEFAULT 1 CHECK (people >= 1),
+  reservation_type TEXT NOT NULL DEFAULT '매장' CHECK (reservation_type IN ('매장', '포장')),
   memo TEXT,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled')),
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))

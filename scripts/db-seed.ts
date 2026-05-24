@@ -18,29 +18,31 @@ async function main() {
   await db.batch(
     [
       {
-        sql: "INSERT INTO reservations (id, name, phone, date, time, people, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        sql: "INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         args: [
           randomUUID(),
           "김다은",
           "010-1234-5678",
           "2026-05-25",
           "14:00",
-          2,
+          1,
+          "매장",
           "창가 자리 요청",
           "pending",
           now,
         ],
       },
       {
-        sql: "INSERT INTO reservations (id, name, phone, date, time, people, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        sql: "INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         args: [
           randomUUID(),
           "박선우",
           "010-8765-4321",
           "2026-05-26",
           "11:30",
-          3,
-          "알레르기 재료 안내 필요",
+          1,
+          "포장",
+          "수령 10분 전 연락 요청",
           "confirmed",
           now,
         ],

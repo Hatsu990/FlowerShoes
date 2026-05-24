@@ -1,8 +1,10 @@
 import {
   CreateReservationInput,
   ReservationStatus,
+  ReservationVisitType,
   ValidationResult,
   reservationStatuses,
+  reservationVisitTypes,
 } from "@/lib/reservations/types";
 
 const phonePattern = /^[0-9+\-()\s]{8,20}$/;
@@ -26,7 +28,7 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
   const phone = toTrimmedString(payload.phone);
   const date = toTrimmedString(payload.date);
   const time = toTrimmedString(payload.time);
-  const peopleRaw = payload.people ?? payload.partySize;
+  const reservationTypeRaw = toTrimmedString(payload.reservationType);
   const memo = toTrimmedString(payload.memo);
   const errors: string[] = [];
 
@@ -43,10 +45,11 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
     errors.push("시간 형식이 올바르지 않습니다. (HH:MM)");
   }
 
-  const people = Number(peopleRaw);
-  if (!Number.isInteger(people) || people < 1 || people > 20) {
-    errors.push("인원 수는 1~20명 사이로 입력해주세요.");
+  const reservationType = (reservationTypeRaw || "매장") as ReservationVisitType;
+  if (!reservationVisitTypes.includes(reservationType)) {
+    errors.push("방문 유형은 매장 또는 포장 중에서 선택해주세요.");
   }
+
   if (memo.length > 500) {
     errors.push("요청사항은 500자 이내로 입력해주세요.");
   }
@@ -62,7 +65,7 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
       phone,
       date,
       time,
-      people,
+      reservationType,
       memo: memo || undefined,
     },
   };

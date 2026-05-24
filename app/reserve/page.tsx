@@ -13,7 +13,11 @@ export default function ReservePage() {
         <div className="reserve-visual">
           <p>Reservation</p>
           <h1>{siteConfig.name} 예약</h1>
-          <div className="placeholder-image placeholder-h tall" />
+          <img
+            className="reserve-photo"
+            src="/images/kkotsin/hongcheon-kkotsin-05.jpg"
+            alt="홍천 꽃신 창가 좌석"
+          />
         </div>
         <ReservationForm title="예약 정보 입력" />
       </section>

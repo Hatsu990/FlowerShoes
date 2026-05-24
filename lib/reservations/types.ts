@@ -1,12 +1,15 @@
 export const reservationStatuses = ["pending", "confirmed", "cancelled"] as const;
 export type ReservationStatus = (typeof reservationStatuses)[number];
 
+export const reservationVisitTypes = ["매장", "포장"] as const;
+export type ReservationVisitType = (typeof reservationVisitTypes)[number];
+
 export interface CreateReservationInput {
   name: string;
   phone: string;
   date: string;
   time: string;
-  people: number;
+  reservationType: ReservationVisitType;
   memo?: string;
 }
 
@@ -16,7 +19,7 @@ export interface Reservation {
   phone: string;
   date: string;
   time: string;
-  people: number;
+  reservationType: ReservationVisitType;
   memo: string | null;
   status: ReservationStatus;
   created_at: string;

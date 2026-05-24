@@ -9,7 +9,7 @@ const initialFormState = {
   phone: "",
   date: "",
   time: "",
-  people: 2,
+  reservationType: "매장" as "매장" | "포장",
   memo: "",
 };
 
@@ -116,6 +116,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
             <input
               required
               type="time"
+              step={300}
               value={form.time}
               onChange={(event) => setForm((prev) => ({ ...prev, time: event.target.value }))}
             />
@@ -123,20 +124,19 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
         </div>
 
         <label>
-          인원 수
-          <input
-            required
-            type="number"
-            value={form.people}
-            min={1}
-            max={20}
+          예약 유형
+          <select
+            value={form.reservationType}
             onChange={(event) =>
               setForm((prev) => ({
                 ...prev,
-                people: Number(event.target.value),
+                reservationType: event.target.value as "매장" | "포장",
               }))
             }
-          />
+          >
+            <option value="매장">매장</option>
+            <option value="포장">포장</option>
+          </select>
         </label>
 
         <label>
@@ -144,7 +144,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
           <textarea
             value={form.memo}
             onChange={(event) => setForm((prev) => ({ ...prev, memo: event.target.value }))}
-            placeholder="알레르기, 좌석 요청 등"
+            placeholder="요청사항을 입력해주세요"
             rows={4}
             maxLength={500}
           />

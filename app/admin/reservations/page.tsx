@@ -38,7 +38,7 @@ export default async function ReservationAdminPage() {
               <th>연락처</th>
               <th>날짜</th>
               <th>시간</th>
-              <th>인원</th>
+              <th>예약유형</th>
               <th>상태</th>
               <th>접수시각</th>
               <th>상세</th>
@@ -51,7 +51,7 @@ export default async function ReservationAdminPage() {
                 <td>{reservation.phone}</td>
                 <td>{reservation.date}</td>
                 <td>{reservation.time}</td>
-                <td>{reservation.people}명</td>
+                <td>{reservation.reservationType}</td>
                 <td>
                   <StatusSelector reservationId={reservation.id} currentStatus={reservation.status} />
                 </td>

@@ -7,6 +7,7 @@ import {
   Reservation,
   ReservationListFilter,
   ReservationStatus,
+  ReservationVisitType,
 } from "@/lib/reservations/types";
 
 type SqlArg = string | number | null;
@@ -19,6 +20,13 @@ function parseStatus(value: unknown): ReservationStatus {
   return "pending";
 }
 
+function parseReservationType(value: unknown): ReservationVisitType {
+  if (value === "매장" || value === "포장") {
+    return value;
+  }
+  return "매장";
+}
+
 function rowToReservation(row: DbRow): Reservation {
   return {
     id: String(row.id),
@@ -26,7 +34,7 @@ function rowToReservation(row: DbRow): Reservation {
     phone: String(row.phone),
     date: String(row.date),
     time: String(row.time),
-    people: Number(row.people),
+    reservationType: parseReservationType(row.reservation_type),
     memo: row.memo == null ? null : String(row.memo),
     status: parseStatus(row.status),
     created_at: String(row.created_at),
@@ -42,7 +50,7 @@ export async function createReservation(input: CreateReservationInput): Promise<
     phone: input.phone,
     date: input.date,
     time: input.time,
-    people: input.people,
+    reservationType: input.reservationType,
     memo: input.memo?.trim() || null,
     status: "pending",
     created_at: new Date().toISOString(),
@@ -50,8 +58,8 @@ export async function createReservation(input: CreateReservationInput): Promise<
 
   await db.execute({
     sql: `
-      INSERT INTO reservations (id, name, phone, date, time, people, memo, status, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, memo, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     args: [
       reservation.id,
@@ -59,7 +67,8 @@ export async function createReservation(input: CreateReservationInput): Promise<
       reservation.phone,
       reservation.date,
       reservation.time,
-      reservation.people,
+      1,
+      reservation.reservationType,
       reservation.memo,
       reservation.status,
       reservation.created_at,
@@ -88,7 +97,7 @@ export async function listReservations(filter: ReservationListFilter = {}): Prom
   }
 
   let sql = `
-    SELECT id, name, phone, date, time, people, memo, status, created_at
+    SELECT id, name, phone, date, time, reservation_type, memo, status, created_at
     FROM reservations
   `;
 
@@ -108,7 +117,7 @@ export async function getReservationById(id: string): Promise<Reservation | null
 
   const result = await db.execute({
     sql: `
-      SELECT id, name, phone, date, time, people, memo, status, created_at
+      SELECT id, name, phone, date, time, reservation_type, memo, status, created_at
       FROM reservations
       WHERE id = ?
       LIMIT 1
