@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ReservationCancelButton } from "@/components/admin/reservation-cancel-button";
+import { ReservationDeleteButton } from "@/components/admin/reservation-delete-button";
 import { StatusSelector } from "@/components/admin/status-selector";
 import { listReservations } from "@/lib/reservations/service";
 import { reservationStatusLabels } from "@/lib/reservations/types";
@@ -16,6 +18,22 @@ function formatDate(dateString: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function formatSelectedMenus(menus: string[]) {
+  if (menus.length === 0) {
+    return "-";
+  }
+
+  return menus
+    .map((menu) =>
+      menu
+        .replace(/\s*[·ㆍ]\s*[\d,]+원/g, "")
+        .replace(/\s*x\s*(\d+)/i, " $1개")
+        .replace(/\bHOT\b/g, "HOT")
+        .replace(/\bICE\b/g, "ICE"),
+    )
+    .join(", ");
 }
 
 export default async function ReservationAdminPage() {
@@ -48,11 +66,12 @@ export default async function ReservationAdminPage() {
               <th>이름</th>
               <th>연락처</th>
               <th>날짜</th>
-              <th>시간</th>
+              <th>방문 시간</th>
               <th>예약유형</th>
               <th>선택메뉴</th>
               <th>상태</th>
               <th>접수시각</th>
+              <th>취소</th>
               <th>상세</th>
             </tr>
           </thead>
@@ -64,11 +83,14 @@ export default async function ReservationAdminPage() {
                 <td>{reservation.date}</td>
                 <td>{reservation.time}</td>
                 <td>{reservation.reservationType}</td>
-                <td>{reservation.selectedMenus.length > 0 ? `${reservation.selectedMenus.length}종` : "-"}</td>
+                <td>{formatSelectedMenus(reservation.selectedMenus)}</td>
                 <td>
                   <StatusSelector reservationId={reservation.id} currentStatus={reservation.status} />
                 </td>
                 <td>{formatDate(reservation.created_at)}</td>
+                <td>
+                  <ReservationCancelButton reservationId={reservation.id} />
+                </td>
                 <td>
                   <Link href={`/admin/reservations/${reservation.id}`}>보기</Link>
                 </td>
@@ -76,7 +98,7 @@ export default async function ReservationAdminPage() {
             ))}
             {activeReservations.length === 0 && (
               <tr>
-                <td colSpan={9}>처리할 예약이 없습니다.</td>
+                <td colSpan={10}>처리할 예약이 없습니다.</td>
               </tr>
             )}
           </tbody>
@@ -91,11 +113,12 @@ export default async function ReservationAdminPage() {
               <th>이름</th>
               <th>연락처</th>
               <th>날짜</th>
-              <th>시간</th>
+              <th>방문 시간</th>
               <th>예약유형</th>
               <th>선택메뉴</th>
               <th>상태</th>
               <th>접수시각</th>
+              <th>삭제</th>
               <th>상세</th>
             </tr>
           </thead>
@@ -107,9 +130,12 @@ export default async function ReservationAdminPage() {
                 <td>{reservation.date}</td>
                 <td>{reservation.time}</td>
                 <td>{reservation.reservationType}</td>
-                <td>{reservation.selectedMenus.length > 0 ? `${reservation.selectedMenus.length}종` : "-"}</td>
+                <td>{formatSelectedMenus(reservation.selectedMenus)}</td>
                 <td>{reservationStatusLabels[reservation.status]}</td>
                 <td>{formatDate(reservation.created_at)}</td>
+                <td>
+                  <ReservationDeleteButton reservationId={reservation.id} />
+                </td>
                 <td>
                   <Link href={`/admin/reservations/${reservation.id}`}>보기</Link>
                 </td>
@@ -117,7 +143,7 @@ export default async function ReservationAdminPage() {
             ))}
             {historyReservations.length === 0 && (
               <tr>
-                <td colSpan={9}>처리 기록이 없습니다.</td>
+                <td colSpan={10}>처리 기록이 없습니다.</td>
               </tr>
             )}
           </tbody>

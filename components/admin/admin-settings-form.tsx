@@ -118,6 +118,20 @@ export function AdminSettingsForm({ initialSettings }: AdminSettingsFormProps) {
 
       <div className="admin-settings-group">
         <h2>영업시간</h2>
+        <label className="admin-settings-checkbox">
+          <input
+            name="developerAlwaysOpen"
+            type="checkbox"
+            checked={settings.developerAlwaysOpen}
+            onChange={(event) =>
+              setSettings((prev) => ({ ...prev, developerAlwaysOpen: event.target.checked }))
+            }
+          />
+          <span>
+            <strong>개발자 모드</strong>
+            영업시간 24시간
+          </span>
+        </label>
         <div className="admin-settings-row">
           <label>
             평일 시작

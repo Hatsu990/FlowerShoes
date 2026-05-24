@@ -38,7 +38,11 @@ export default async function ReservationDetailPage({ params }: PageProps) {
           <p>Admin</p>
           <h1>예약 상세</h1>
         </div>
-        <Link href="/admin/reservations">목록으로</Link>
+        <div className="admin-header-actions">
+          <Link href="/admin/reservations">예약 목록</Link>
+          <Link href="/admin/settings">알림 설정</Link>
+          <Link href="/">홈으로</Link>
+        </div>
       </header>
 
       <section className="admin-detail-card">

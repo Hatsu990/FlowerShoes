@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { ReservationStatus, reservationStatusLabels } from "@/lib/reservations/types";
+
+const editableStatuses: ReservationStatus[] = ["pending", "confirmed", "completed"];
 
 interface StatusSelectorProps {
   reservationId: string;
@@ -11,8 +14,12 @@ interface StatusSelectorProps {
 
 export function StatusSelector({ reservationId, currentStatus }: StatusSelectorProps) {
   const [status, setStatus] = useState<ReservationStatus>(currentStatus);
+  const [savedStatus, setSavedStatus] = useState<ReservationStatus>(currentStatus);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const router = useRouter();
+  const statusOptions = editableStatuses.includes(savedStatus) ? editableStatuses : [savedStatus];
+  const canEdit = editableStatuses.includes(savedStatus);
 
   async function updateStatus() {
     setSaving(true);
@@ -34,6 +41,8 @@ export function StatusSelector({ reservationId, currentStatus }: StatusSelectorP
       }
 
       setMessage("저장됨");
+      setSavedStatus(status);
+      router.refresh();
     } catch (error) {
       console.error(error);
       setMessage("통신 오류");
@@ -44,19 +53,20 @@ export function StatusSelector({ reservationId, currentStatus }: StatusSelectorP
 
   return (
     <div className="status-editor">
+      <strong className="status-current-badge">{reservationStatusLabels[savedStatus]}</strong>
       <select
         aria-label="예약 상태"
         value={status}
         onChange={(event) => setStatus(event.target.value as ReservationStatus)}
-        disabled={saving}
+        disabled={saving || !canEdit}
       >
-        {Object.entries(reservationStatusLabels).map(([value, label]) => (
+        {statusOptions.map((value) => (
           <option value={value} key={value}>
-            {label}
+            {reservationStatusLabels[value]}
           </option>
         ))}
       </select>
-      <button type="button" onClick={updateStatus} disabled={saving} aria-label="예약 상태 저장">
+      <button type="button" onClick={updateStatus} disabled={saving || !canEdit} aria-label="예약 상태 저장">
         {saving ? "저장 중..." : "저장"}
       </button>
       {message && <span>{message}</span>}

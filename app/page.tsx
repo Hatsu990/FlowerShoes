@@ -9,24 +9,40 @@ const imageBase = "/images/kkotsin";
 
 const spacePhotos = [
   {
-    src: `${imageBase}/hongcheon-kkotsin-05.jpg`,
+    src: `${imageBase}/hongcheon-kkotsin-04.jpg`,
     title: "창가 좌석",
-    description: "큰 창과 식물이 보이는 밝은 실내",
+    description: "식물과 액자가 놓인 차분한 실내",
+    className: "fit-contain",
   },
   {
-    src: `${imageBase}/hongcheon-kkotsin-11.jpg`,
-    title: "조용한 자리",
-    description: "나무 톤과 낮은 채도의 편안한 좌석",
+    src: `${imageBase}/hongcheon-kkotsin-06.jpg`,
+    title: "햇빛과 식물",
+    description: "캔버스와 나무톤이 만드는 조용한 분위기",
+    className: "",
   },
   {
     src: `${imageBase}/hongcheon-kkotsin-03.jpg`,
     title: "디저트 쇼케이스",
-    description: "간단한 디저트와 음료를 함께 고르는 공간",
+    description: "차와 함께 고르는 작은 디저트",
+    className: "",
+  },
+  {
+    src: `${imageBase}/hongcheon-kkotsin-07.jpg`,
+    title: "공간의 작은 장식",
+    description: "곳곳에 놓인 오브제로 채워지는 분위기",
+    className: "fit-contain",
   },
   {
     src: `${imageBase}/hongcheon-kkotsin-13.jpg`,
-    title: "이름 때문에 생기는 작은 오해",
-    description: "전통 꽃신도 있지만, 이름의 뜻은 꽃피는 신장대리",
+    title: "꽃신이라는 이름",
+    description: "꽃피는 신장대리에서 시작된 작은 이야기",
+    className: "fit-contain",
+  },
+  {
+    src: `${imageBase}/hongcheon-kkotsin-02.jpg`,
+    title: "꽃피는 신장대리",
+    description: "공간의 이름을 보여주는 바깥 사인",
+    className: "fit-contain photo-sign",
   },
 ];
 
@@ -60,14 +76,13 @@ export default function HomePage() {
       <header className="top-nav">
         <div className="brand">
           <span>{siteConfig.name}</span>
-          <small>{siteConfig.subtitle}</small>
         </div>
         <div className="top-nav-actions">
           <a href="#menu-board">메뉴</a>
           <Link href="/admin/reservations">관리자</Link>
-          <Link className="primary" href="/reserve">
+          <a className="primary" href="#reserve-cta">
             예약하기
-          </Link>
+          </a>
         </div>
       </header>
 
@@ -86,23 +101,48 @@ export default function HomePage() {
             <br />
             마을 카페
           </h1>
-          <div className="hero-actions">
-            <Link className="primary" href="/reserve">
-              지금 예약
-            </Link>
-            <a href="#intro">공간 보기</a>
-          </div>
+        </div>
+      </section>
+
+      <section className="section visit-info-section">
+        <div className="visit-photo-grid">
+          <article className="visit-photo-panel location-panel">
+            <img
+              src={`${imageBase}/hongcheon-kkotsin-01.jpg`}
+              width={2048}
+              height={1152}
+              loading="lazy"
+              alt="홍천 꽃신 도로명 주소 위치 안내 사진"
+            />
+            <div className="visit-photo-copy">
+              <h3>위치</h3>
+              <p>{siteConfig.address}</p>
+            </div>
+          </article>
+
+          <article className="visit-photo-panel floor-guide-panel">
+            <img
+              src={`${imageBase}/hongcheon-kkotsin-12.jpg`}
+              width={2048}
+              height={1152}
+              loading="lazy"
+              alt="홍천 꽃신 층별 안내도"
+            />
+            <div className="visit-photo-copy">
+              <h3>층별 안내</h3>
+            </div>
+          </article>
         </div>
       </section>
 
       <section id="intro" className="section with-grid">
-        <div className="section-head">
+        <div className="section-head immersive">
           <p>Space</p>
-          <h2>실제 사진으로 보는 꽃신의 분위기</h2>
+          <h2>사진으로 꽃신의 분위기를 먼저 느껴보세요.</h2>
         </div>
-        <div className="image-grid image-grid-large">
+        <div className="image-grid image-grid-large visual-mosaic">
           {spacePhotos.map((photo) => (
-            <article key={photo.src}>
+            <article className={photo.className} key={photo.src}>
               <img
                 className="content-image"
                 src={photo.src}
@@ -111,61 +151,13 @@ export default function HomePage() {
                 loading="lazy"
                 alt={`${siteConfig.name} ${photo.title}`}
               />
-              <h3>{photo.title}</h3>
-              <p>{photo.description}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="section visit-info-section">
-        <div className="section-head">
-          <p>Visit</p>
-          <h2>방문 전 확인할 정보</h2>
-        </div>
-        <div className="visit-info-grid">
-          <article className="visit-info-card floor-guide-card">
-            <div>
-              <p>Floor Guide</p>
-              <h3>층별 안내</h3>
-            </div>
-            <img
-              src={`${imageBase}/hongcheon-kkotsin-12.jpg`}
-              width={2048}
-              height={1152}
-              loading="lazy"
-              alt="홍천 꽃신 층별 안내도"
-            />
-            <p>지하 1층부터 3층까지의 공간 구성을 한눈에 볼 수 있습니다.</p>
-          </article>
-
-          <article className="visit-info-card location-card">
-            <div>
-              <p>Location / Contact</p>
-              <h3>위치 · 문의</h3>
-            </div>
-            <img
-              src={`${imageBase}/hongcheon-kkotsin-01.jpg`}
-              width={2048}
-              height={1152}
-              loading="lazy"
-              alt="홍천 꽃신 도로명 주소 위치 안내 사진"
-            />
-            <div className="contact-info inline">
-              <p>{siteConfig.address}</p>
-              <p>{siteConfig.businessHours}</p>
-              <p>TEL. {siteConfig.phone}</p>
-              <p>Kakao. {siteConfig.kakaoChannel}</p>
-              <Link className="primary block" href="/reserve">
-                예약하러 가기
-              </Link>
-            </div>
-          </article>
-        </div>
-      </section>
-
       <section id="menu-board" className="section menu-board">
-        <div className="section-head">
+        <div className="section-head immersive">
           <p>Menu</p>
           <h2>메뉴판</h2>
         </div>
@@ -195,7 +187,7 @@ export default function HomePage() {
       </section>
 
       <section id="reserve-cta" className="section reserve-cta">
-        <div className="section-head light">
+        <div className="section-head light immersive">
           <p>Reservation</p>
           <h2>방문 전 예약 요청</h2>
         </div>

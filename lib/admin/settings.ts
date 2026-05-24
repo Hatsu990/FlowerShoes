@@ -13,6 +13,7 @@ export interface AdminNotificationSettings {
   weekendOpen: string;
   weekendClose: string;
   closedDates: string[];
+  developerAlwaysOpen: boolean;
 }
 
 const settingsKey = "notification";
@@ -27,6 +28,7 @@ const defaultSettings: AdminNotificationSettings = {
   weekendOpen: "10:00",
   weekendClose: "20:00",
   closedDates: [],
+  developerAlwaysOpen: false,
 };
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -69,6 +71,7 @@ function parseSettings(value: unknown): AdminNotificationSettings {
       weekendOpen: parseTime(parsed.weekendOpen, defaultSettings.weekendOpen),
       weekendClose: parseTime(parsed.weekendClose, defaultSettings.weekendClose),
       closedDates: parseClosedDates(parsed.closedDates),
+      developerAlwaysOpen: parsed.developerAlwaysOpen === true,
     };
   } catch {
     return defaultSettings;
@@ -106,6 +109,7 @@ export async function updateAdminNotificationSettings(
     weekendOpen: parseTime(input.weekendOpen, defaultSettings.weekendOpen),
     weekendClose: parseTime(input.weekendClose, defaultSettings.weekendClose),
     closedDates: parseClosedDates(input.closedDates),
+    developerAlwaysOpen: input.developerAlwaysOpen === true,
   };
 
   await db.execute({

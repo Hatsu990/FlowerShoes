@@ -11,7 +11,7 @@ import {
 const phonePattern = /^[0-9+\-()\s]{8,20}$/;
 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-const timeStepMinutes = 5;
+const timeStepMinutes = 10;
 
 function toTrimmedString(value: unknown): string {
   if (typeof value !== "string") {
@@ -44,6 +44,10 @@ function isWeekend(dateString: string) {
 }
 
 function getBusinessHours(settings: AdminNotificationSettings, dateString: string) {
+  if (settings.developerAlwaysOpen) {
+    return { open: "00:00", close: "23:50" };
+  }
+
   if (isWeekend(dateString)) {
     return { open: settings.weekendOpen, close: settings.weekendClose };
   }
@@ -93,11 +97,11 @@ export function validateCreateReservationInput(
   if (timePattern.test(time)) {
     const minute = Number(time.split(":")[1]);
     if (minute % timeStepMinutes !== 0) {
-      errors.push("시간은 5분 단위로 선택해주세요.");
+      errors.push("시간은 10분 단위로 선택해주세요.");
     }
   }
 
-  if (adminSettings.closedDates.includes(date)) {
+  if (!adminSettings.developerAlwaysOpen && adminSettings.closedDates.includes(date)) {
     errors.push("오늘은 휴무일입니다.");
   }
 
@@ -108,7 +112,7 @@ export function validateCreateReservationInput(
     const open = timeToMinutes(hours.open);
     const close = timeToMinutes(hours.close);
 
-    if (current < open || current > close) {
+    if (!adminSettings.developerAlwaysOpen && (current < open || current > close)) {
       errors.push("영업이 종료되었습니다.");
     }
 
@@ -154,4 +158,3 @@ export function parseReservationStatus(value: unknown): ReservationStatus | null
   }
   return reservationStatuses.includes(value as ReservationStatus) ? (value as ReservationStatus) : null;
 }
-

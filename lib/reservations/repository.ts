@@ -169,3 +169,14 @@ export async function updateReservationStatus(
 
   return getReservationById(id);
 }
+
+export async function deleteReservation(id: string): Promise<boolean> {
+  await ensureDatabaseSchema();
+
+  const result = await db.execute({
+    sql: "DELETE FROM reservations WHERE id = ?",
+    args: [id],
+  });
+
+  return Boolean(result.rowsAffected);
+}

@@ -7,6 +7,7 @@ import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
 
 type FormStatus = "idle" | "loading" | "success" | "error";
 type SelectedMenuMap = Record<string, number>;
+type MenuTemperature = "HOT" | "ICE" | "";
 
 const initialFormState = {
   name: "",
@@ -26,20 +27,27 @@ function formatPrice(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
 }
 
-function getMenuOptions(menu: CafeMenuItem) {
-  const options: { label: string; price: number }[] = [];
+function getMenuKey(category: string, menu: CafeMenuItem) {
+  return `${category}::${menu.name}`;
+}
 
+function getMenuVariants(menu: CafeMenuItem) {
+  const variants: { label: MenuTemperature; price: number }[] = [];
   if (typeof menu.hot === "number") {
-    options.push({ label: `${menu.name} HOT`, price: menu.hot });
+    variants.push({ label: "HOT", price: menu.hot });
   }
   if (typeof menu.ice === "number") {
-    options.push({ label: `${menu.name} ICE`, price: menu.ice });
+    variants.push({ label: "ICE", price: menu.ice });
   }
   if (typeof menu.price === "number") {
-    options.push({ label: menu.name, price: menu.price });
+    variants.push({ label: "", price: menu.price });
   }
 
-  return options;
+  return variants;
+}
+
+function getSelectedMenuLabel(menu: CafeMenuItem, variant: MenuTemperature) {
+  return variant ? `${menu.name} ${variant}` : menu.name;
 }
 
 function timeToMinutes(time: string) {
@@ -75,6 +83,10 @@ function getTodayTimeString() {
 }
 
 function getBusinessHours(settings: AdminNotificationSettings | null, dateString: string) {
+  if (settings?.developerAlwaysOpen) {
+    return { open: "00:00", close: "23:50" };
+  }
+
   if (!settings) {
     return { open: "10:00", close: "20:00" };
   }
@@ -91,7 +103,7 @@ function getTimeOptions(settings: AdminNotificationSettings | null, dateString: 
   const open = timeToMinutes(hours.open);
   const close = timeToMinutes(hours.close);
   const options: string[] = [];
-  for (let value = open; value <= close; value += 5) {
+  for (let value = open; value <= close; value += 10) {
     options.push(minutesToTime(value));
   }
   return options;
@@ -121,13 +133,39 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
         .map(([label, count]) => `${label} x ${count}`),
     [form.selectedMenus],
   );
+  const selectedMenuDetails = useMemo(() => {
+    const priceByLabel = new Map<string, number>();
+
+    cafeMenu.forEach((category) => {
+      category.menus.forEach((menu) => {
+        getMenuVariants(menu).forEach((variant) => {
+          priceByLabel.set(getSelectedMenuLabel(menu, variant.label), variant.price);
+        });
+      });
+    });
+
+    return Object.entries(form.selectedMenus)
+      .filter(([, count]) => count > 0)
+      .map(([label, count]) => {
+        const price = priceByLabel.get(label) ?? 0;
+        return {
+          label,
+          count,
+          price,
+          total: price * count,
+        };
+      });
+  }, [form.selectedMenus]);
+  const selectedMenuTotalCount = selectedMenuDetails.reduce((sum, item) => sum + item.count, 0);
+  const selectedMenuTotalPrice = selectedMenuDetails.reduce((sum, item) => sum + item.total, 0);
   const timeOptions = useMemo(() => getTimeOptions(adminSettings, today), [adminSettings, today]);
-  const isClosedDate = adminSettings?.closedDates.includes(today) ?? false;
+  const isDeveloperAlwaysOpen = adminSettings?.developerAlwaysOpen ?? false;
+  const isClosedDate = !isDeveloperAlwaysOpen && (adminSettings?.closedDates.includes(today) ?? false);
   const businessHours = getBusinessHours(adminSettings, today);
   const nowMinutes = timeToMinutes(currentTime);
   const openMinutes = timeToMinutes(businessHours.open);
   const closeMinutes = timeToMinutes(businessHours.close);
-  const isBusinessOpen = !isClosedDate && nowMinutes >= openMinutes && nowMinutes <= closeMinutes;
+  const isBusinessOpen = isDeveloperAlwaysOpen || (!isClosedDate && nowMinutes >= openMinutes && nowMinutes <= closeMinutes);
   const submitDisabled = isLoading || !isBusinessOpen;
   const submitText = isBusinessOpen ? buttonText : "영업이 종료되었습니다";
 
@@ -158,7 +196,8 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
     };
   }, []);
 
-  function updateMenuQuantity(label: string, delta: number) {
+  function updateMenuQuantity(menu: CafeMenuItem, variant: MenuTemperature, delta: number) {
+    const label = getSelectedMenuLabel(menu, variant);
     setForm((prev) => {
       const current = prev.selectedMenus[label] ?? 0;
       const next = Math.max(0, Math.min(99, current + delta));
@@ -262,41 +301,41 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
           </small>
         </div>
 
-        <div className="reservation-form-row single">
-          <label>
-            시간
+        <section className="time-picker" aria-label="시간 선택">
+          <div className="time-picker-head">
+            <strong>시간 선택</strong>
+          </div>
+          <div className="time-select-wrap">
             <select
               required
               name="time"
               value={form.time}
               onChange={(event) => setForm((prev) => ({ ...prev, time: event.target.value }))}
             >
-              <option value="">시간 선택</option>
+              <option value="">방문 시간을 선택해주세요</option>
               {timeOptions.map((time) => (
                 <option value={time} key={time}>
                   {time}
                 </option>
               ))}
             </select>
-          </label>
-        </div>
+          </div>
+        </section>
 
-        <label>
-          예약 유형
-          <select
-            name="reservationType"
-            value={form.reservationType}
-            onChange={(event) =>
-              setForm((prev) => ({
-                ...prev,
-                reservationType: event.target.value as "매장" | "포장",
-              }))
-            }
-          >
-            <option value="포장">포장</option>
-            <option value="매장">매장</option>
-          </select>
-        </label>
+        <fieldset className="reservation-type-toggle">
+          <legend>예약 유형</legend>
+          {(["포장", "매장"] as const).map((type) => (
+            <button
+              type="button"
+              className={form.reservationType === type ? "selected" : ""}
+              aria-pressed={form.reservationType === type}
+              onClick={() => setForm((prev) => ({ ...prev, reservationType: type }))}
+              key={type}
+            >
+              {type}
+            </button>
+          ))}
+        </fieldset>
 
         <section className="menu-picker" aria-label="메뉴 고르기">
           <div className="menu-picker-head">
@@ -308,33 +347,45 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
             {cafeMenu.map((category) => (
               <div className="menu-picker-category" key={category.category}>
                 <h4>{category.category}</h4>
-                {category.menus.flatMap(getMenuOptions).map((option) => {
-                  const quantity = form.selectedMenus[option.label] ?? 0;
+                {category.menus.map((menu) => {
+                  const menuKey = getMenuKey(category.category, menu);
+                  const variants = getMenuVariants(menu);
                   return (
-                    <div className="menu-picker-item" key={option.label}>
-                      <div>
-                        <span>{option.label}</span>
-                        <small>{formatPrice(option.price)}</small>
+                    <div className="menu-picker-item" key={menuKey}>
+                      <div className="menu-picker-info">
+                        <span>{menu.name}</span>
+                        <small>{variants.map((variant) => `${variant.label ? `${variant.label} ` : ""}${formatPrice(variant.price)}`).join(" / ")}</small>
                       </div>
-                      <div className="menu-quantity">
-                        <button
-                          type="button"
-                          className="quantity-button"
-                          onClick={() => updateMenuQuantity(option.label, -1)}
-                          disabled={quantity === 0}
-                          aria-label={`${option.label} 수량 줄이기`}
-                        >
-                          -
-                        </button>
-                        <span>{quantity}</span>
-                        <button
-                          type="button"
-                          className="quantity-button"
-                          onClick={() => updateMenuQuantity(option.label, 1)}
-                          aria-label={`${option.label} 추가`}
-                        >
-                          +
-                        </button>
+                      <div className="menu-variant-list">
+                        {variants.map((variant) => {
+                          const selectedLabel = getSelectedMenuLabel(menu, variant.label);
+                          const quantity = form.selectedMenus[selectedLabel] ?? 0;
+                          return (
+                            <div className="menu-variant-row" key={selectedLabel}>
+                              <span>{variant.label || "메뉴"}</span>
+                              <div className="menu-quantity">
+                                <button
+                                  type="button"
+                                  className="quantity-button"
+                                  onClick={() => updateMenuQuantity(menu, variant.label, -1)}
+                                  disabled={quantity === 0}
+                                  aria-label={`${selectedLabel} 수량 줄이기`}
+                                >
+                                  -
+                                </button>
+                                <span>{quantity}</span>
+                                <button
+                                  type="button"
+                                  className="quantity-button"
+                                  onClick={() => updateMenuQuantity(menu, variant.label, 1)}
+                                  aria-label={`${selectedLabel} 추가`}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -343,11 +394,19 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
             ))}
           </div>
 
-          {selectedMenuLabels.length > 0 && (
+          {selectedMenuDetails.length > 0 && (
             <div className="selected-menu-summary">
-              {selectedMenuLabels.map((menu) => (
-                <span key={menu}>{menu}</span>
-              ))}
+              <div className="selected-menu-total">
+                <strong>총 {selectedMenuTotalCount}잔</strong>
+                <span>{formatPrice(selectedMenuTotalPrice)}</span>
+              </div>
+              <div className="selected-menu-list">
+                {selectedMenuDetails.map((menu) => (
+                  <span key={menu.label}>
+                    {menu.label} x {menu.count} · {formatPrice(menu.total)}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </section>
