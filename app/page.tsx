@@ -6,8 +6,15 @@ import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
 import { siteConfig } from "@/lib/constants/site";
 
 const imageBase = "/images/kkotsin";
+const aboutPhoto = `${imageBase}/hongcheon-kkotsin-13.jpg`;
 
 const spacePhotos = [
+  {
+    src: `${imageBase}/hongcheon-kkotsin-02.jpg`,
+    title: "꽃피는 신장대리",
+    description: "공간의 이름을 보여주는 바깥 사인",
+    className: "fit-contain photo-sign",
+  },
   {
     src: `${imageBase}/hongcheon-kkotsin-04.jpg`,
     title: "창가 좌석",
@@ -32,18 +39,6 @@ const spacePhotos = [
     description: "곳곳에 놓인 오브제로 채워지는 분위기",
     className: "fit-contain",
   },
-  {
-    src: `${imageBase}/hongcheon-kkotsin-13.jpg`,
-    title: "꽃신이라는 이름",
-    description: "꽃피는 신장대리에서 시작된 작은 이야기",
-    className: "fit-contain",
-  },
-  {
-    src: `${imageBase}/hongcheon-kkotsin-02.jpg`,
-    title: "꽃피는 신장대리",
-    description: "공간의 이름을 보여주는 바깥 사인",
-    className: "fit-contain photo-sign",
-  },
 ];
 
 function formatPrice(value: number) {
@@ -65,6 +60,11 @@ function getMenuPriceLabel(menu: CafeMenuItem) {
 
   return labels.join(" / ");
 }
+
+const menuColumns = [
+  cafeMenu.filter((_, index) => index % 2 === 0),
+  cafeMenu.filter((_, index) => index % 2 === 1),
+];
 
 export default function HomePage() {
   return (
@@ -97,9 +97,9 @@ export default function HomePage() {
         />
         <div className="hero-copy">
           <h1>
-            홍천 신장대리에 핀{" "}
+            오늘은 조금 천천히
             <br />
-            마을 카페
+            꽃신에서 쉬어가세요
           </h1>
         </div>
       </section>
@@ -138,7 +138,7 @@ export default function HomePage() {
       <section id="intro" className="section with-grid">
         <div className="section-head immersive">
           <p>Space</p>
-          <h2>사진으로 꽃신의 분위기를 먼저 느껴보세요.</h2>
+          <h2>꽃신을 소개합니다</h2>
         </div>
         <div className="image-grid image-grid-large visual-mosaic">
           {spacePhotos.map((photo) => (
@@ -156,6 +156,49 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="section space-intro-section">
+        <div className="section-head immersive">
+          <p>About</p>
+          <h2>홍천 신장대리에 피어난 작은 쉼터</h2>
+        </div>
+        <div className="space-intro-layout">
+          <figure className="space-intro-photo">
+            <img src={aboutPhoto} width={1536} height={2048} loading="lazy" alt="꽃신이라는 이름을 떠올리게 하는 작은 장식" />
+          </figure>
+          <div className="space-intro-copy">
+            <p>
+              꽃피는 신장대리에서,
+              <br />
+              잠시 쉬어갈 수 있는 공간을 만들고 싶었습니다.
+            </p>
+            <p>
+              꽃신은 홍천의 조용한 풍경과
+              <br />
+              따뜻한 차 한잔의 여유를 함께 담아낸 전통차 카페입니다.
+            </p>
+            <p>
+              은은하게 퍼지는 차향,
+              <br />
+              편안한 우드톤의 공간,
+              <br />
+              그리고 천천히 머물러가기 좋은 분위기 속에서
+              <br />
+              복잡한 하루를 잠시 내려놓고 쉬어가실 수 있습니다.
+            </p>
+            <p>
+              직접 준비한 전통차와 디저트,
+              <br />
+              그리고 홍천의 계절감을 함께 느껴보세요.
+            </p>
+            <p>
+              혼자 조용히 머물러도 좋고,
+              <br />
+              소중한 사람과 편하게 이야기를 나누기에도 좋은 공간이 되기를 바랍니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section id="menu-board" className="section menu-board">
         <div className="section-head immersive">
           <p>Menu</p>
@@ -168,7 +211,7 @@ export default function HomePage() {
             <figcaption>매장 메뉴판 사진</figcaption>
           </figure>
 
-          <div className="menu-categories">
+          <div className="menu-categories-mobile">
             {cafeMenu.map((category) => (
               <article className="menu-category" key={category.category}>
                 <h3>{category.category}</h3>
@@ -183,27 +226,42 @@ export default function HomePage() {
               </article>
             ))}
           </div>
+
+          <div className="menu-categories">
+            {menuColumns.map((column, columnIndex) => (
+              <div className="menu-category-column" key={columnIndex}>
+                {column.map((category) => (
+                  <article className="menu-category" key={category.category}>
+                    <h3>{category.category}</h3>
+                    <ul className="menu-list">
+                      {category.menus.map((menu) => (
+                        <li key={menu.name}>
+                          <span>{menu.name}</span>
+                          <span>{getMenuPriceLabel(menu)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section id="reserve-cta" className="section reserve-cta">
-        <div className="section-head light immersive">
-          <p>Reservation</p>
-          <h2>방문 전 예약 요청</h2>
-        </div>
         <div className="cta-layout">
           <div className="cta-copy">
             <h3>방문 시간과 원하는 메뉴를 함께 남겨주세요.</h3>
-            <p>메뉴를 추가하고 수량을 고르면 예약 요청과 함께 전달됩니다.</p>
             <p>단체 방문이나 별도 요청은 요청사항에 적어주세요.</p>
           </div>
-          <ReservationForm compact title="빠른 예약 요청" />
+          <ReservationForm compact title="방문 예약하기" />
         </div>
       </section>
 
       <footer className="footer">
         <p>{siteConfig.name}</p>
-        <p>꽃피는 신장대리에서 차와 디저트를 만나는 마을 카페</p>
+        <p>홍천 신장대리에 피어난 카페</p>
       </footer>
     </main>
     </>
