@@ -7,9 +7,18 @@ CREATE TABLE IF NOT EXISTS reservations (
   time TEXT NOT NULL,
   people INTEGER NOT NULL DEFAULT 1 CHECK (people >= 1),
   reservation_type TEXT NOT NULL DEFAULT '매장' CHECK (reservation_type IN ('매장', '포장')),
+  selected_menus TEXT NOT NULL DEFAULT '[]',
   memo TEXT,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+`;
+
+export const ADMIN_SETTINGS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS admin_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 `;
 

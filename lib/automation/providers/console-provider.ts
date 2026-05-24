@@ -4,7 +4,7 @@ export const consoleAutomationProvider: AutomationProvider = {
   id: "console",
   async dispatch(event) {
     console.info(
-      `[automation:${event.name}] reservation=${event.reservation.id} status=${event.reservation.status}`,
+      `[automation:${event.name}] reservation=${event.reservation.id} status=${event.reservation.status} notificationMode=${event.adminSettings?.notificationMode ?? "unset"} phone=${event.adminSettings?.phone ?? "unset"}`,
     );
   },
 };

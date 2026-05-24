@@ -18,7 +18,7 @@ async function main() {
   await db.batch(
     [
       {
-        sql: "INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        sql: "INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, selected_menus, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         args: [
           randomUUID(),
           "김다은",
@@ -27,13 +27,14 @@ async function main() {
           "14:00",
           1,
           "매장",
+          JSON.stringify(["대추차 HOT x 2", "마카롱 x 2"]),
           "창가 자리 요청",
           "pending",
           now,
         ],
       },
       {
-        sql: "INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        sql: "INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, selected_menus, memo, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         args: [
           randomUUID(),
           "박선우",
@@ -42,6 +43,7 @@ async function main() {
           "11:30",
           1,
           "포장",
+          JSON.stringify(["아메리카노 ICE x 1", "조각케이크 x 1"]),
           "수령 10분 전 연락 요청",
           "confirmed",
           now,

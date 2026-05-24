@@ -2,18 +2,12 @@
 
 import { useState } from "react";
 
-import { ReservationStatus } from "@/lib/reservations/types";
+import { ReservationStatus, reservationStatusLabels } from "@/lib/reservations/types";
 
 interface StatusSelectorProps {
   reservationId: string;
   currentStatus: ReservationStatus;
 }
-
-const statusLabelMap: Record<ReservationStatus, string> = {
-  pending: "pending",
-  confirmed: "confirmed",
-  cancelled: "cancelled",
-};
 
 export function StatusSelector({ reservationId, currentStatus }: StatusSelectorProps) {
   const [status, setStatus] = useState<ReservationStatus>(currentStatus);
@@ -51,17 +45,18 @@ export function StatusSelector({ reservationId, currentStatus }: StatusSelectorP
   return (
     <div className="status-editor">
       <select
+        aria-label="예약 상태"
         value={status}
         onChange={(event) => setStatus(event.target.value as ReservationStatus)}
         disabled={saving}
       >
-        {Object.entries(statusLabelMap).map(([value, label]) => (
+        {Object.entries(reservationStatusLabels).map(([value, label]) => (
           <option value={value} key={value}>
             {label}
           </option>
         ))}
       </select>
-      <button type="button" onClick={updateStatus} disabled={saving}>
+      <button type="button" onClick={updateStatus} disabled={saving} aria-label="예약 상태 저장">
         {saving ? "저장 중..." : "저장"}
       </button>
       {message && <span>{message}</span>}

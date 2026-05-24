@@ -1,3 +1,4 @@
+import type { AdminNotificationSettings } from "@/lib/admin/settings";
 import {
   CreateReservationInput,
   ReservationStatus,
@@ -10,6 +11,7 @@ import {
 const phonePattern = /^[0-9+\-()\s]{8,20}$/;
 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+const timeStepMinutes = 5;
 
 function toTrimmedString(value: unknown): string {
   if (typeof value !== "string") {
@@ -18,17 +20,57 @@ function toTrimmedString(value: unknown): string {
   return value.trim();
 }
 
-export function validateCreateReservationInput(input: unknown): ValidationResult<CreateReservationInput> {
+function timeToMinutes(time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
+function getTodayDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentTimeString() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+function isWeekend(dateString: string) {
+  const day = new Date(`${dateString}T00:00:00`).getDay();
+  return day === 0 || day === 6;
+}
+
+function getBusinessHours(settings: AdminNotificationSettings, dateString: string) {
+  if (isWeekend(dateString)) {
+    return { open: settings.weekendOpen, close: settings.weekendClose };
+  }
+
+  return { open: settings.weekdayOpen, close: settings.weekdayClose };
+}
+
+export function validateCreateReservationInput(
+  input: unknown,
+  adminSettings: AdminNotificationSettings,
+): ValidationResult<CreateReservationInput> {
   if (typeof input !== "object" || input === null) {
     return { ok: false, errors: ["요청 데이터 형식이 올바르지 않습니다."] };
   }
 
   const payload = input as Record<string, unknown>;
+  const today = getTodayDateString();
   const name = toTrimmedString(payload.name);
   const phone = toTrimmedString(payload.phone);
-  const date = toTrimmedString(payload.date);
+  const date = toTrimmedString(payload.date) || today;
   const time = toTrimmedString(payload.time);
   const reservationTypeRaw = toTrimmedString(payload.reservationType);
+  const selectedMenusRaw = Array.isArray(payload.selectedMenus) ? payload.selectedMenus : [];
+  const selectedMenus = selectedMenusRaw
+    .map((menu) => toTrimmedString(menu))
+    .filter(Boolean)
+    .slice(0, 30);
   const memo = toTrimmedString(payload.memo);
   const errors: string[] = [];
 
@@ -41,17 +83,51 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
   if (!datePattern.test(date)) {
     errors.push("날짜 형식이 올바르지 않습니다. (YYYY-MM-DD)");
   }
+  if (date !== today) {
+    errors.push("예약 날짜는 오늘만 선택할 수 있습니다.");
+  }
   if (!timePattern.test(time)) {
     errors.push("시간 형식이 올바르지 않습니다. (HH:MM)");
   }
 
-  const reservationType = (reservationTypeRaw || "매장") as ReservationVisitType;
+  if (timePattern.test(time)) {
+    const minute = Number(time.split(":")[1]);
+    if (minute % timeStepMinutes !== 0) {
+      errors.push("시간은 5분 단위로 선택해주세요.");
+    }
+  }
+
+  if (adminSettings.closedDates.includes(date)) {
+    errors.push("오늘은 휴무일입니다.");
+  }
+
+  if (datePattern.test(date) && timePattern.test(time)) {
+    const current = timeToMinutes(getCurrentTimeString());
+    const requested = timeToMinutes(time);
+    const hours = getBusinessHours(adminSettings, date);
+    const open = timeToMinutes(hours.open);
+    const close = timeToMinutes(hours.close);
+
+    if (current < open || current > close) {
+      errors.push("영업이 종료되었습니다.");
+    }
+
+    if (requested < open || requested > close) {
+      errors.push("영업시간 내 시간만 선택해주세요.");
+    }
+  }
+
+  const reservationType = (reservationTypeRaw || "포장") as ReservationVisitType;
   if (!reservationVisitTypes.includes(reservationType)) {
     errors.push("방문 유형은 매장 또는 포장 중에서 선택해주세요.");
   }
 
   if (memo.length > 500) {
     errors.push("요청사항은 500자 이내로 입력해주세요.");
+  }
+
+  if (selectedMenus.some((menu) => menu.length > 80)) {
+    errors.push("선택 메뉴 이름이 너무 깁니다.");
   }
 
   if (errors.length > 0) {
@@ -66,6 +142,7 @@ export function validateCreateReservationInput(input: unknown): ValidationResult
       date,
       time,
       reservationType,
+      selectedMenus,
       memo: memo || undefined,
     },
   };
@@ -77,3 +154,4 @@ export function parseReservationStatus(value: unknown): ReservationStatus | null
   }
   return reservationStatuses.includes(value as ReservationStatus) ? (value as ReservationStatus) : null;
 }
+

@@ -14,7 +14,7 @@ type SqlArg = string | number | null;
 type DbRow = Record<string, unknown>;
 
 function parseStatus(value: unknown): ReservationStatus {
-  if (value === "pending" || value === "confirmed" || value === "cancelled") {
+  if (value === "pending" || value === "confirmed" || value === "completed" || value === "cancelled") {
     return value;
   }
   return "pending";
@@ -27,6 +27,22 @@ function parseReservationType(value: unknown): ReservationVisitType {
   return "매장";
 }
 
+function parseSelectedMenus(value: unknown): string[] {
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((menu): menu is string => typeof menu === "string");
+  } catch {
+    return [];
+  }
+}
+
 function rowToReservation(row: DbRow): Reservation {
   return {
     id: String(row.id),
@@ -35,6 +51,7 @@ function rowToReservation(row: DbRow): Reservation {
     date: String(row.date),
     time: String(row.time),
     reservationType: parseReservationType(row.reservation_type),
+    selectedMenus: parseSelectedMenus(row.selected_menus),
     memo: row.memo == null ? null : String(row.memo),
     status: parseStatus(row.status),
     created_at: String(row.created_at),
@@ -51,6 +68,7 @@ export async function createReservation(input: CreateReservationInput): Promise<
     date: input.date,
     time: input.time,
     reservationType: input.reservationType,
+    selectedMenus: input.selectedMenus,
     memo: input.memo?.trim() || null,
     status: "pending",
     created_at: new Date().toISOString(),
@@ -58,8 +76,8 @@ export async function createReservation(input: CreateReservationInput): Promise<
 
   await db.execute({
     sql: `
-      INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, memo, status, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO reservations (id, name, phone, date, time, people, reservation_type, selected_menus, memo, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     args: [
       reservation.id,
@@ -69,6 +87,7 @@ export async function createReservation(input: CreateReservationInput): Promise<
       reservation.time,
       1,
       reservation.reservationType,
+      JSON.stringify(reservation.selectedMenus),
       reservation.memo,
       reservation.status,
       reservation.created_at,
@@ -97,7 +116,7 @@ export async function listReservations(filter: ReservationListFilter = {}): Prom
   }
 
   let sql = `
-    SELECT id, name, phone, date, time, reservation_type, memo, status, created_at
+    SELECT id, name, phone, date, time, reservation_type, selected_menus, memo, status, created_at
     FROM reservations
   `;
 
@@ -117,7 +136,7 @@ export async function getReservationById(id: string): Promise<Reservation | null
 
   const result = await db.execute({
     sql: `
-      SELECT id, name, phone, date, time, reservation_type, memo, status, created_at
+      SELECT id, name, phone, date, time, reservation_type, selected_menus, memo, status, created_at
       FROM reservations
       WHERE id = ?
       LIMIT 1

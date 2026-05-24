@@ -16,6 +16,8 @@ export default function ReservePage() {
           <img
             className="reserve-photo"
             src="/images/kkotsin/hongcheon-kkotsin-05.jpg"
+            width={2048}
+            height={1152}
             alt="홍천 꽃신 창가 좌석"
           />
         </div>

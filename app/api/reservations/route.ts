@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
   if (statusRaw && !status) {
     return NextResponse.json(
-      { ok: false, message: "status는 pending/confirmed/cancelled 중 하나여야 합니다." },
+      { ok: false, message: "status는 pending/confirmed/completed/cancelled 중 하나여야 합니다." },
       { status: 400 },
     );
   }

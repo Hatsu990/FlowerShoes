@@ -1,4 +1,5 @@
 import { dispatchAutomationEvent } from "@/lib/automation/dispatcher";
+import { getAdminNotificationSettings } from "@/lib/admin/settings";
 import {
   createReservation as createReservationRecord,
   getReservationById as getReservationByIdRecord,
@@ -9,7 +10,8 @@ import { Reservation, ReservationListFilter, ReservationStatus } from "@/lib/res
 import { parseReservationStatus, validateCreateReservationInput } from "@/lib/reservations/validation";
 
 export async function createReservation(rawInput: unknown): Promise<{ reservation?: Reservation; errors?: string[] }> {
-  const validation = validateCreateReservationInput(rawInput);
+  const adminSettings = await getAdminNotificationSettings();
+  const validation = validateCreateReservationInput(rawInput, adminSettings);
   if (!validation.ok || !validation.data) {
     return { errors: validation.errors ?? ["유효하지 않은 요청입니다."] };
   }
@@ -19,6 +21,7 @@ export async function createReservation(rawInput: unknown): Promise<{ reservatio
   await dispatchAutomationEvent({
     name: "reservation.created",
     reservation,
+    adminSettings,
     occurredAt: new Date().toISOString(),
   });
 
@@ -47,9 +50,12 @@ export async function updateReservationStatus(
     return { errors: ["예약 정보를 찾을 수 없습니다."] };
   }
 
+  const adminSettings = await getAdminNotificationSettings();
+
   await dispatchAutomationEvent({
     name: "reservation.status_changed",
     reservation,
+    adminSettings,
     occurredAt: new Date().toISOString(),
   });
 

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { StatusSelector } from "@/components/admin/status-selector";
 import { getReservationById } from "@/lib/reservations/service";
+import { reservationStatusLabels } from "@/lib/reservations/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -67,6 +68,20 @@ export default async function ReservationDetailPage({ params }: PageProps) {
             <dd>{reservation.reservationType}</dd>
           </div>
           <div>
+            <dt>선택메뉴</dt>
+            <dd>
+              {reservation.selectedMenus.length > 0 ? (
+                <ul className="admin-menu-list">
+                  {reservation.selectedMenus.map((menu) => (
+                    <li key={menu}>{menu}</li>
+                  ))}
+                </ul>
+              ) : (
+                "-"
+              )}
+            </dd>
+          </div>
+          <div>
             <dt>요청사항</dt>
             <dd>{reservation.memo || "-"}</dd>
           </div>
@@ -74,6 +89,7 @@ export default async function ReservationDetailPage({ params }: PageProps) {
             <dt>상태</dt>
             <dd>
               <StatusSelector reservationId={reservation.id} currentStatus={reservation.status} />
+              <span className="admin-status-current">현재: {reservationStatusLabels[reservation.status]}</span>
             </dd>
           </div>
           <div>
