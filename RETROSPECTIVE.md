@@ -43,3 +43,14 @@
 - 검증 결과: `npm run build` 통과, `npx tsc --noEmit` 통과, 로컬 프로덕션 서버에서 manifest/public-key/service-worker 200 응답 확인.
 - 남은 위험 요소: Vercel CLI 로그인이 현재 환경에서 확인되지 않아 배포 환경변수 등록은 아직 직접 완료하지 못했다.
 - 다음 단계: Vercel 프로젝트 환경변수에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`를 등록하고 재배포한 뒤 휴대폰에서 알림 권한을 테스트한다.
+
+## 2026-05-25 - 관리자 모바일 예약 목록/알림 해제 개선
+
+- 사용자 요청 요약: 모바일에서 예약 목록 오른쪽이 잘려 보이고 관리자 버튼 배치도 모바일에 맞지 않으며, 웹푸시 알림 해제 버튼도 필요함.
+- 진행한 문제: 데스크톱 표 중심의 예약 목록을 모바일 카드형으로 병행 표시하고, 관리자 헤더/탭을 모바일 그리드로 재배치.
+- 확인한 원인과 단서: 기존 `.admin-table`은 `min-width: 1060px` 표라 모바일에서 가로 스크롤 또는 잘림이 발생했고, 알림 설정 UI에는 구독 등록만 있고 삭제 흐름이 없었다.
+- 시도한 해결 과정: 520px 이하에서는 표를 숨기고 카드 리스트를 표시하도록 변경, `/api/push/subscriptions`에 DELETE 추가, 클라이언트에서 `unsubscribe()`와 서버 구독 삭제를 함께 실행하도록 수정.
+- 적용한 변경 사항: 예약 카드형 모바일 UI, 관리자 헤더/탭 모바일 레이아웃, `이 기기 알림 해제` 버튼, 알림 해제 API.
+- 검증 결과: `npm run build` 통과, `npx tsc --noEmit` 통과, 로컬 프로덕션 서버에서 `/admin/reservations` 200 응답 확인.
+- 남은 위험 요소: Playwright가 현재 런타임에 없어 실제 모바일 스크린샷 자동 검수는 못 했으므로 배포 후 휴대폰에서 여백과 버튼 크기 확인 필요.
+- 다음 단계: GitHub 푸시 후 Vercel 배포 완료 시 휴대폰에서 `/admin/reservations`와 `/admin/settings`를 확인한다.

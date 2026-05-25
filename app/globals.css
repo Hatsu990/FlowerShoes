@@ -1354,6 +1354,10 @@ figcaption {
   overflow-x: auto;
 }
 
+.admin-reservation-card-list {
+  display: none;
+}
+
 .admin-table {
   width: 100%;
   min-width: 1060px;
@@ -1563,6 +1567,18 @@ figcaption {
   width: fit-content;
 }
 
+.push-control-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.push-control-actions button.secondary {
+  border-color: #cfa19a;
+  background: #fff8f2;
+  color: #8a3d32;
+}
+
 .push-control-message {
   margin: 0;
   color: var(--accent-strong) !important;
@@ -1715,6 +1731,150 @@ figcaption {
 }
 
 @media (max-width: 520px) {
+  .admin-page,
+  .admin-detail-page {
+    padding: 0.75rem;
+  }
+
+  .admin-header {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .admin-header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+    gap: 0.45rem;
+  }
+
+  .admin-header-actions a {
+    min-height: 42px;
+    padding: 0.5rem 0.45rem;
+    font-size: 0.82rem;
+  }
+
+  .admin-tab-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .admin-tab-list button {
+    justify-content: space-between;
+    min-height: 42px;
+    border-radius: 10px;
+    padding: 0.52rem 0.6rem;
+  }
+
+  .admin-table-wrap {
+    display: none;
+  }
+
+  .admin-reservation-card-list {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .admin-reservation-card {
+    display: grid;
+    gap: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(255, 252, 245, 0.88);
+    padding: 0.82rem;
+  }
+
+  .admin-reservation-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.7rem;
+  }
+
+  .admin-reservation-card-head div {
+    display: grid;
+    gap: 0.18rem;
+  }
+
+  .admin-reservation-card-head strong {
+    font-size: 1rem;
+  }
+
+  .admin-reservation-card-head span {
+    color: var(--text-soft);
+    font-size: 0.8rem;
+  }
+
+  .admin-reservation-type,
+  .admin-reservation-card-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #e9efe8;
+    color: var(--accent-strong);
+    padding: 0.34rem 0.56rem;
+    font-size: 0.78rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .admin-reservation-card dl {
+    display: grid;
+    gap: 0.48rem;
+    margin: 0;
+  }
+
+  .admin-reservation-card dl div {
+    display: grid;
+    gap: 0.18rem;
+  }
+
+  .admin-reservation-card dt {
+    color: var(--text-soft);
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+
+  .admin-reservation-card dd {
+    margin: 0;
+    font-size: 0.86rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-reservation-card-status .status-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-reservation-card-status .status-editor select,
+  .admin-reservation-card-status .status-editor button {
+    width: 100%;
+  }
+
+  .admin-reservation-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  .admin-empty-message {
+    margin: 0;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 1rem;
+    color: var(--text-soft);
+  }
+
+  .push-control-actions {
+    display: grid;
+  }
+
+  .push-control button {
+    width: 100%;
+  }
+
   .top-nav {
     align-items: flex-start;
   }

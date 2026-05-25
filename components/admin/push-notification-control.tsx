@@ -22,18 +22,44 @@ function isPushSupported() {
 export function PushNotificationControl() {
   const [supported, setSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [subscribed, setSubscribed] = useState(false);
   const [message, setMessage] = useState("이 기기에서 예약 알림을 받을 수 있습니다.");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isPushSupported()) {
-      setSupported(false);
-      setMessage("이 브라우저는 웹 푸시 알림을 지원하지 않습니다.");
-      return;
+    let mounted = true;
+
+    async function checkSubscription() {
+      if (!isPushSupported()) {
+        setSupported(false);
+        setMessage("이 브라우저는 웹 푸시 알림을 지원하지 않습니다.");
+        return;
+      }
+
+      setSupported(true);
+      setPermission(Notification.permission);
+
+      try {
+        const registration = await navigator.serviceWorker.getRegistration("/sw.js");
+        const subscription = await registration?.pushManager.getSubscription();
+        if (mounted) {
+          setSubscribed(Boolean(subscription));
+          if (subscription) {
+            setMessage("이 기기에서 새 예약 알림을 받고 있습니다.");
+          }
+        }
+      } catch {
+        if (mounted) {
+          setSubscribed(false);
+        }
+      }
     }
 
-    setSupported(true);
-    setPermission(Notification.permission);
+    checkSubscription();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   async function enableNotifications() {
@@ -87,10 +113,46 @@ export function PushNotificationControl() {
         return;
       }
 
+      setSubscribed(true);
       setMessage("이 기기에서 새 예약 알림을 받을 준비가 됐습니다.");
     } catch (error) {
       console.error(error);
       setMessage("알림 설정 중 문제가 발생했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function disableNotifications() {
+    if (!isPushSupported()) {
+      return;
+    }
+
+    setSaving(true);
+    setMessage("알림 해제를 진행하고 있습니다.");
+
+    try {
+      const registration = await navigator.serviceWorker.getRegistration("/sw.js");
+      const subscription = await registration?.pushManager.getSubscription();
+
+      if (!subscription) {
+        setSubscribed(false);
+        setMessage("이 기기는 현재 알림을 받고 있지 않습니다.");
+        return;
+      }
+
+      await fetch("/api/push/subscriptions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ endpoint: subscription.endpoint }),
+      });
+      await subscription.unsubscribe();
+
+      setSubscribed(false);
+      setMessage("이 기기의 예약 알림을 해제했습니다.");
+    } catch (error) {
+      console.error(error);
+      setMessage("알림 해제 중 문제가 발생했습니다.");
     } finally {
       setSaving(false);
     }
@@ -102,9 +164,14 @@ export function PushNotificationControl() {
       <p className="admin-settings-muted">
         사장님 휴대폰에서 이 사이트를 홈 화면에 추가한 뒤 알림을 허용하면, 새 예약이 들어올 때 알림을 받을 수 있습니다.
       </p>
-      <button type="button" onClick={enableNotifications} disabled={!supported || saving || permission === "denied"}>
-        {saving ? "설정 중.." : "이 기기에서 알림 받기"}
-      </button>
+      <div className="push-control-actions">
+        <button type="button" onClick={enableNotifications} disabled={!supported || saving || permission === "denied"}>
+          {saving && !subscribed ? "설정 중.." : "이 기기에서 알림 받기"}
+        </button>
+        <button type="button" className="secondary" onClick={disableNotifications} disabled={!supported || saving || !subscribed}>
+          {saving && subscribed ? "해제 중.." : "이 기기 알림 해제"}
+        </button>
+      </div>
       <p className="push-control-message" aria-live="polite">
         {message}
       </p>

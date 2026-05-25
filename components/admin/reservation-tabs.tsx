@@ -56,6 +56,24 @@ function isArchivedStatus(status: ReservationStatus) {
   return status === "completed" || status === "cancelled";
 }
 
+function ReservationActions({
+  reservation,
+  showManagement,
+}: {
+  reservation: Reservation;
+  showManagement: boolean;
+}) {
+  if (!showManagement) {
+    return null;
+  }
+
+  return isActiveStatus(reservation.status) ? (
+    <ReservationCancelButton reservationId={reservation.id} />
+  ) : (
+    <ReservationDeleteButton reservationId={reservation.id} />
+  );
+}
+
 function ReservationTable({
   emptyMessage,
   reservations,
@@ -66,61 +84,104 @@ function ReservationTable({
   showManagement: boolean;
 }) {
   return (
-    <section className="admin-table-wrap">
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>이름</th>
-            <th>연락처</th>
-            <th>날짜</th>
-            <th>방문 시간</th>
-            <th>예약 유형</th>
-            <th>선택 메뉴</th>
-            <th>상태</th>
-            <th>접수 시각</th>
-            {showManagement && <th>관리</th>}
-            <th>상세</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reservations.map((reservation) => (
-            <tr key={reservation.id}>
-              <td>{reservation.name}</td>
-              <td>{reservation.phone}</td>
-              <td>{reservation.date}</td>
-              <td>{reservation.time}</td>
-              <td>{reservation.reservationType}</td>
-              <td>{formatSelectedMenus(reservation.selectedMenus)}</td>
-              <td>
-                {isActiveStatus(reservation.status) ? (
-                  <StatusSelector reservationId={reservation.id} currentStatus={reservation.status} />
-                ) : (
-                  <span className="status-current-badge">{reservationStatusLabels[reservation.status]}</span>
-                )}
-              </td>
-              <td>{formatDate(reservation.created_at)}</td>
-              {showManagement && (
+    <>
+      <section className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>이름</th>
+              <th>연락처</th>
+              <th>날짜</th>
+              <th>방문 시간</th>
+              <th>예약 유형</th>
+              <th>선택 메뉴</th>
+              <th>상태</th>
+              <th>접수 시각</th>
+              {showManagement && <th>관리</th>}
+              <th>상세</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reservations.map((reservation) => (
+              <tr key={reservation.id}>
+                <td>{reservation.name}</td>
+                <td>{reservation.phone}</td>
+                <td>{reservation.date}</td>
+                <td>{reservation.time}</td>
+                <td>{reservation.reservationType}</td>
+                <td>{formatSelectedMenus(reservation.selectedMenus)}</td>
                 <td>
                   {isActiveStatus(reservation.status) ? (
-                    <ReservationCancelButton reservationId={reservation.id} />
+                    <StatusSelector reservationId={reservation.id} currentStatus={reservation.status} />
                   ) : (
-                    <ReservationDeleteButton reservationId={reservation.id} />
+                    <span className="status-current-badge">{reservationStatusLabels[reservation.status]}</span>
                   )}
                 </td>
+                <td>{formatDate(reservation.created_at)}</td>
+                {showManagement && (
+                  <td>
+                    <ReservationActions reservation={reservation} showManagement={showManagement} />
+                  </td>
+                )}
+                <td>
+                  <Link href={`/admin/reservations/${reservation.id}`}>보기</Link>
+                </td>
+              </tr>
+            ))}
+            {reservations.length === 0 && (
+              <tr>
+                <td colSpan={showManagement ? 10 : 9}>{emptyMessage}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="admin-reservation-card-list">
+        {reservations.map((reservation) => (
+          <article className="admin-reservation-card" key={reservation.id}>
+            <div className="admin-reservation-card-head">
+              <div>
+                <strong>{reservation.name}</strong>
+                <span>{reservation.phone}</span>
+              </div>
+              <span className="admin-reservation-type">{reservation.reservationType}</span>
+            </div>
+
+            <dl>
+              <div>
+                <dt>방문 시간</dt>
+                <dd>
+                  {reservation.date} {reservation.time}
+                </dd>
+              </div>
+              <div>
+                <dt>선택 메뉴</dt>
+                <dd>{formatSelectedMenus(reservation.selectedMenus)}</dd>
+              </div>
+              <div>
+                <dt>접수 시각</dt>
+                <dd>{formatDate(reservation.created_at)}</dd>
+              </div>
+            </dl>
+
+            <div className="admin-reservation-card-status">
+              {isActiveStatus(reservation.status) ? (
+                <StatusSelector reservationId={reservation.id} currentStatus={reservation.status} />
+              ) : (
+                <span className="status-current-badge">{reservationStatusLabels[reservation.status]}</span>
               )}
-              <td>
-                <Link href={`/admin/reservations/${reservation.id}`}>보기</Link>
-              </td>
-            </tr>
-          ))}
-          {reservations.length === 0 && (
-            <tr>
-              <td colSpan={showManagement ? 10 : 9}>{emptyMessage}</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+            </div>
+
+            <div className="admin-reservation-card-actions">
+              <Link href={`/admin/reservations/${reservation.id}`}>상세 보기</Link>
+              <ReservationActions reservation={reservation} showManagement={showManagement} />
+            </div>
+          </article>
+        ))}
+        {reservations.length === 0 && <p className="admin-empty-message">{emptyMessage}</p>}
+      </section>
+    </>
   );
 }
 

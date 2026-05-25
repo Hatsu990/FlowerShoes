@@ -104,4 +104,6 @@ export async function deletePushSubscription(endpoint: string) {
     sql: "DELETE FROM push_subscriptions WHERE endpoint = ?",
     args: [endpoint],
   });
+
+  return { ok: true };
 }
