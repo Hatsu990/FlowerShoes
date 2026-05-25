@@ -1,14 +1,11 @@
 import Link from "next/link";
 
-import { MenuBoardViewer } from "@/components/menu/menu-board-viewer";
 import { ReservationForm } from "@/components/reservation/reservation-form";
 import { getAdminNotificationSettings, type AdminNotificationSettings } from "@/lib/admin/settings";
 import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
 import { defaultAboutImage, defaultHeroImage, imageBase } from "@/lib/constants/gallery";
 import { siteConfig } from "@/lib/constants/site";
 import { getKoreaDateString, getKoreaTimeString, isKoreaWeekend } from "@/lib/datetime/korea";
-
-const menuBoardImage = `${imageBase}/hongcheon-kkotsin-08.png`;
 
 const spacePhotos = [
   {
@@ -262,11 +259,6 @@ export default async function HomePage() {
         </div>
 
         <div className="menu-layout">
-          <figure className="menu-photo-card">
-            <MenuBoardViewer src={menuBoardImage} alt="홍천 꽃신 전체 메뉴판" />
-            <figcaption>매장 메뉴판 사진</figcaption>
-          </figure>
-
           <div className="menu-categories-mobile">
             {visibleMenu.map((category) => (
               <article className="menu-category" key={category.category}>

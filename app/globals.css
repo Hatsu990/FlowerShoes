@@ -577,6 +577,7 @@ figcaption {
   display: grid;
   gap: 1rem;
   align-items: stretch;
+  justify-items: center;
 }
 
 .menu-photo-card {
@@ -661,6 +662,7 @@ figcaption {
 
 .menu-categories,
 .menu-categories-mobile {
+  width: min(100%, 920px);
   display: grid;
   gap: 0.68rem;
 }
@@ -2174,12 +2176,4 @@ figcaption {
     min-height: 620px;
   }
 
-  .menu-layout {
-    grid-template-columns: 0.95fr 1.05fr;
-    align-items: stretch;
-  }
-
-  .menu-photo-card img {
-    min-height: 100%;
-  }
 }
