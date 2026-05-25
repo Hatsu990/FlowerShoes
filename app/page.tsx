@@ -104,7 +104,7 @@ function getBusinessStatus(settings: AdminNotificationSettings) {
 
   return {
     label: isOpen ? "현재 영업 중" : "영업 종료",
-    detail: `오늘 영업시간 ${hours.open} - ${hours.close}`,
+    detail: `영업시간 ${hours.open} - ${hours.close}`,
     open: isOpen,
   };
 }
