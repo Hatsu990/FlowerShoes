@@ -582,8 +582,8 @@ figcaption {
 
 .menu-board-title h2 {
   margin: 0;
-  color: var(--text-main);
-  font-size: clamp(2.4rem, 9vw, 5.6rem);
+  color: var(--accent);
+  font-size: clamp(1.2rem, 4.5vw, 2.8rem);
   line-height: 0.95;
   font-weight: 900;
 }
