@@ -727,26 +727,12 @@ figcaption {
 .cta-layout {
   display: grid;
   gap: 0.9rem;
-  align-items: start;
+  justify-items: center;
+  align-items: center;
 }
 
-.cta-copy {
-  color: #f8fbf6;
-}
-
-.cta-copy h3 {
-  margin: 0;
-  font-size: clamp(1.7rem, 5vw, 2.75rem);
-  line-height: 1.18;
-  text-wrap: balance;
-}
-
-.cta-copy p {
-  margin: 0.72rem 0 0;
-  color: #d9e1d8;
-  font-size: clamp(1rem, 2vw, 1.24rem);
-  font-weight: 700;
-  line-height: 1.55;
+.cta-layout .reservation-form-card {
+  width: min(100%, 620px);
 }
 
 .reservation-form-card {
@@ -2061,11 +2047,6 @@ figcaption {
   .space-intro-photo,
   .space-intro-photo img {
     min-height: 0;
-  }
-
-  .cta-layout {
-    grid-template-columns: 0.9fr 1.1fr;
-    gap: 1rem;
   }
 
   .visit-info-grid {

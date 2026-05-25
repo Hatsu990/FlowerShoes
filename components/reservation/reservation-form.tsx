@@ -266,7 +266,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
     <div className={`reservation-form-card ${compact ? "compact" : ""}`}>
       <div className="reservation-form-head">
         <h3>{title}</h3>
-        <p>방문 정보와 원하는 메뉴를 함께 남겨주세요.</p>
+        {!compact && <p>방문 정보와 원하는 메뉴를 함께 남겨주세요.</p>}
       </div>
       <form className="reservation-form" onSubmit={onSubmit}>
         <label>

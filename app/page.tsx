@@ -313,10 +313,6 @@ export default async function HomePage() {
 
       <section id="reserve-cta" className="section reserve-cta">
         <div className="cta-layout">
-          <div className="cta-copy">
-            <h3>방문 시간과 원하는 메뉴를 함께 남겨주세요.</h3>
-            <p>단체 방문이나 별도 요청은 요청사항에 적어주세요.</p>
-          </div>
           <ReservationForm compact title="방문 예약하기" />
         </div>
       </section>
