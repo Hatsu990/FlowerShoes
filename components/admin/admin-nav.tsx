@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { logoutAdmin } from "@/app/admin/login/actions";
+
 type AdminNavKey = "reservations" | "settings" | "business" | "menu";
 
 interface AdminNavProps {
@@ -24,6 +26,9 @@ export function AdminNav({ active }: AdminNavProps) {
       <Link className="home-link" href="/">
         홈으로
       </Link>
+      <form action={logoutAdmin}>
+        <button type="submit">로그아웃</button>
+      </form>
     </div>
   );
 }

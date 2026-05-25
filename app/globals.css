@@ -1250,7 +1250,8 @@ figcaption {
 }
 
 .admin-header > a,
-.admin-header-actions a {
+.admin-header-actions a,
+.admin-header-actions button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1263,6 +1264,14 @@ figcaption {
   font-size: 0.86rem;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.admin-header-actions form {
+  margin: 0;
+}
+
+.admin-header-actions button {
+  cursor: pointer;
 }
 
 .admin-header-actions a.active {
@@ -1281,6 +1290,12 @@ figcaption {
   background: #654936;
 }
 
+.admin-header-actions button {
+  border-color: rgba(117, 82, 54, 0.18);
+  background: rgba(255, 252, 245, 0.66);
+  color: var(--text-soft);
+}
+
 .admin-header p {
   margin: 0;
   color: var(--text-soft);
@@ -1289,6 +1304,88 @@ figcaption {
 
 .admin-header h1 {
   margin: 0.28rem 0 0;
+}
+
+.admin-login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(129, 103, 74, 0.12), transparent 34rem),
+    linear-gradient(135deg, #f3eadc, #e9ded0);
+}
+
+.admin-login-card {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 1.2rem;
+  border: 1px solid rgba(117, 82, 54, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 252, 245, 0.9);
+  box-shadow: 0 24px 70px rgba(55, 36, 24, 0.12);
+  padding: 1.4rem;
+}
+
+.admin-login-card h1,
+.admin-login-card p {
+  margin: 0;
+}
+
+.admin-login-card h1 {
+  margin-top: 0.2rem;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+}
+
+.admin-login-card > a {
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.admin-login-eyebrow {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.admin-login-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.admin-login-form label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-main);
+  font-weight: 900;
+}
+
+.admin-login-form input {
+  min-height: 48px;
+  border: 1px solid rgba(117, 82, 54, 0.22);
+  border-radius: 10px;
+  background: #fffaf2;
+  padding: 0.75rem 0.9rem;
+  color: var(--text-main);
+  font: inherit;
+}
+
+.admin-login-form button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-login-error {
+  color: #b64b32;
+  font-size: 0.88rem;
+  font-weight: 800;
 }
 
 .admin-section-title {
