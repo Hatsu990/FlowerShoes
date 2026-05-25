@@ -734,7 +734,27 @@ figcaption {
 }
 
 .cta-layout .reservation-form-card {
-  width: min(100%, 620px);
+  width: min(100%, 1120px);
+  padding: clamp(1rem, 2.4vw, 1.7rem);
+}
+
+.cta-layout .reservation-form-head h3 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.cta-layout .reservation-form {
+  gap: clamp(0.72rem, 1.6vw, 1rem);
+}
+
+.cta-layout .reservation-form label {
+  font-size: clamp(0.86rem, 1.5vw, 0.98rem);
+}
+
+.cta-layout .reservation-form input,
+.cta-layout .reservation-form textarea,
+.cta-layout .reservation-form select {
+  min-height: 48px;
+  padding: 0.72rem 0.82rem;
 }
 
 .reservation-form-card {
