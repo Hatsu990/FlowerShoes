@@ -6,6 +6,7 @@ import { getAdminNotificationSettings, type AdminNotificationSettings } from "@/
 import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
 import { defaultAboutImage, defaultHeroImage, imageBase } from "@/lib/constants/gallery";
 import { siteConfig } from "@/lib/constants/site";
+import { getKoreaDateString, getKoreaTimeString, isKoreaWeekend } from "@/lib/datetime/korea";
 
 const menuBoardImage = `${imageBase}/hongcheon-kkotsin-08.png`;
 
@@ -79,26 +80,13 @@ function isMenuSoldOut(settings: AdminNotificationSettings, category: string, me
   return settings.soldOutMenus.includes(getMenuKey(category, menuName));
 }
 
-function isWeekend(date: Date) {
-  const day = date.getDay();
-  return day === 0 || day === 6;
-}
-
 function timeToMinutes(time: string) {
   const [hour, minute] = time.split(":").map(Number);
   return hour * 60 + minute;
 }
 
-function getTodayDateString(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function getBusinessStatus(settings: AdminNotificationSettings) {
-  const now = new Date();
-  const today = getTodayDateString(now);
+  const today = getKoreaDateString();
 
   if (!settings.developerAlwaysOpen && settings.closedDates.includes(today)) {
     return { label: "오늘 휴무", detail: "오늘은 예약 접수가 쉬어갑니다.", open: false };
@@ -106,10 +94,10 @@ function getBusinessStatus(settings: AdminNotificationSettings) {
 
   const hours = settings.developerAlwaysOpen
     ? { open: "00:00", close: "23:50" }
-    : isWeekend(now)
+    : isKoreaWeekend(today)
       ? { open: settings.weekendOpen, close: settings.weekendClose }
       : { open: settings.weekdayOpen, close: settings.weekdayClose };
-  const current = now.getHours() * 60 + now.getMinutes();
+  const current = timeToMinutes(getKoreaTimeString());
   const open = timeToMinutes(hours.open);
   const close = timeToMinutes(hours.close);
   const isOpen = settings.developerAlwaysOpen || (current >= open && current <= close);

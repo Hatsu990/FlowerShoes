@@ -1,4 +1,5 @@
 import type { AdminNotificationSettings } from "@/lib/admin/settings";
+import { getKoreaDateString, getKoreaTimeString, isKoreaWeekend } from "@/lib/datetime/korea";
 import {
   CreateReservationInput,
   ReservationStatus,
@@ -25,30 +26,12 @@ function timeToMinutes(time: string) {
   return hour * 60 + minute;
 }
 
-function getTodayDateString() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function getCurrentTimeString() {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-}
-
-function isWeekend(dateString: string) {
-  const day = new Date(`${dateString}T00:00:00`).getDay();
-  return day === 0 || day === 6;
-}
-
 function getBusinessHours(settings: AdminNotificationSettings, dateString: string) {
   if (settings.developerAlwaysOpen) {
     return { open: "00:00", close: "23:50" };
   }
 
-  if (isWeekend(dateString)) {
+  if (isKoreaWeekend(dateString)) {
     return { open: settings.weekendOpen, close: settings.weekendClose };
   }
 
@@ -64,7 +47,7 @@ export function validateCreateReservationInput(
   }
 
   const payload = input as Record<string, unknown>;
-  const today = getTodayDateString();
+  const today = getKoreaDateString();
   const name = toTrimmedString(payload.name);
   const phone = toTrimmedString(payload.phone);
   const date = toTrimmedString(payload.date) || today;
@@ -106,7 +89,7 @@ export function validateCreateReservationInput(
   }
 
   if (datePattern.test(date) && timePattern.test(time)) {
-    const current = timeToMinutes(getCurrentTimeString());
+    const current = timeToMinutes(getKoreaTimeString());
     const requested = timeToMinutes(time);
     const hours = getBusinessHours(adminSettings, date);
     const open = timeToMinutes(hours.open);
