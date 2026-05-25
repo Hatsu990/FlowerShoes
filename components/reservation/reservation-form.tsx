@@ -259,7 +259,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
       }
 
       setStatus("success");
-      setMessage("예약 요청이 접수되었습니다.\n확인 후 연락드릴게요 : )");
+      setMessage("예약 요청이 접수되었습니다 : )");
       setSuccessSummary({
         reservationId: json.reservationId ?? "",
         reservationNumber: json.reservationNumber ?? "",
