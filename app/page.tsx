@@ -337,6 +337,9 @@ export default async function HomePage() {
       <footer className="footer">
         <p>{siteConfig.name}</p>
         <p>홍천 신장대리에 피어난 카페</p>
+        <Link className="footer-admin-link" href="/admin/settings">
+          관리자
+        </Link>
       </footer>
       <a className="mobile-reserve-button" href="#reserve-cta">
         방문 예약하기

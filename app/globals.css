@@ -1182,13 +1182,22 @@ figcaption {
 }
 
 .footer {
-  padding: 2rem 1rem 2.5rem;
+  padding: 2rem 1rem 5rem;
   border-top: 1px solid var(--line);
   color: var(--text-soft);
 }
 
 .footer p {
   margin: 0.2rem 0;
+}
+
+.footer-admin-link {
+  display: inline-flex;
+  margin-top: 0.7rem;
+  border-bottom: 1px solid rgba(116, 101, 85, 0.34);
+  color: rgba(89, 76, 62, 0.72);
+  font-size: 0.76rem;
+  font-weight: 800;
 }
 
 .reserve-page {
