@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "M PLUS Rounded 1c";
+  src: url("/fonts/m-plus-rounded-1c-900.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
 :root {
   --bg-main: #e8e1d5;
   --bg-soft: #d9d1c4;
@@ -583,9 +591,11 @@ figcaption {
 .menu-board-title h2 {
   margin: 0;
   color: var(--accent);
-  font-size: clamp(1.2rem, 4.5vw, 2.8rem);
+  font-family: "M PLUS Rounded 1c", "Arial Rounded MT Bold", sans-serif;
+  font-size: clamp(1.45rem, 5vw, 3.2rem);
   line-height: 0.95;
   font-weight: 900;
+  letter-spacing: 0.01em;
 }
 
 .menu-layout {
