@@ -32,3 +32,14 @@
 - 검증 결과: `npx tsc --noEmit` 통과.
 - 남은 위험 요소: 동일 시각 동시 예약이 극단적으로 겹치면 표시 번호 계산이 완전한 DB 시퀀스만큼 엄격하지는 않다.
 - 다음 단계: 브라우저에서 새 예약을 넣어 완료 카드에 `001` 형식 번호와 줄바꿈 문구가 보이는지 확인한다.
+
+## 2026-05-25 - PWA/Web Push 알림 테스트 구조 추가
+
+- 사용자 요청 요약: 문자 API 없이 사이트/PWA만으로 휴대폰 예약 알림을 실험할 수 있는지 확인하고, 가능한 부분은 끝까지 구현 요청.
+- 진행한 문제: 관리자 휴대폰에서 웹 푸시 구독을 등록하고 새 예약 생성 시 알림을 보내는 기본 구조를 추가.
+- 확인한 원인과 단서: 배포 주소가 HTTPS라 PWA/Web Push의 필수 조건은 충족되어 있었고, 문자 API 없이도 VAPID 기반 웹 푸시로 실험 가능했다.
+- 시도한 해결 과정: `web-push` 패키지 설치, VAPID 키 생성, 로컬 `.env`에 키 저장, manifest/service worker/API/provider/관리자 버튼을 추가했다.
+- 적용한 변경 사항: PWA manifest, `/sw.js`, `/api/push/public-key`, `/api/push/subscriptions`, push subscription 저장소, web-push automation provider, 관리자 알림 설정의 `이 기기에서 알림 받기` UI 추가.
+- 검증 결과: `npm run build` 통과, `npx tsc --noEmit` 통과, 로컬 프로덕션 서버에서 manifest/public-key/service-worker 200 응답 확인.
+- 남은 위험 요소: Vercel CLI 로그인이 현재 환경에서 확인되지 않아 배포 환경변수 등록은 아직 직접 완료하지 못했다.
+- 다음 단계: Vercel 프로젝트 환경변수에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`를 등록하고 재배포한 뒤 휴대폰에서 알림 권한을 테스트한다.

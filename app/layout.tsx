@@ -6,6 +6,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "홍천 꽃신 | 꽃피는 신장대리 마을 카페",
   description: "꽃피는 신장대리, 홍천 꽃신 카페 예약 및 안내",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "꽃신",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
