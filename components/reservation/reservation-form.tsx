@@ -45,10 +45,6 @@ function formatPrice(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
 }
 
-function getMenuKey(category: string, menu: CafeMenuItem) {
-  return `${category}::${menu.name}`;
-}
-
 function getMenuVariants(menu: CafeMenuItem) {
   const variants: { label: MenuTemperature; price: number }[] = [];
   if (typeof menu.hot === "number") {
@@ -156,9 +152,6 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
   const isBusinessOpen = isDeveloperAlwaysOpen || (!isClosedDate && nowMinutes >= openMinutes && nowMinutes < closeMinutes);
   const submitDisabled = isLoading || !isBusinessOpen;
   const submitText = isBusinessOpen ? buttonText : "영업이 종료되었습니다";
-  const hiddenMenus = adminSettings?.hiddenMenus ?? [];
-  const soldOutMenus = adminSettings?.soldOutMenus ?? [];
-
   useEffect(() => {
     let mounted = true;
 
@@ -192,8 +185,21 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
     }
   }, [form.time, timeOptions]);
 
-  function updateMenuQuantity(menu: CafeMenuItem, variant: MenuTemperature, delta: number) {
-    const label = getSelectedMenuLabel(menu, variant);
+  useEffect(() => {
+    function addMenuFromBoard(event: Event) {
+      const customEvent = event as CustomEvent<{ label?: string }>;
+      const label = customEvent.detail?.label;
+
+      if (label) {
+        updateMenuQuantity(label, 1);
+      }
+    }
+
+    window.addEventListener("flower-shoes:add-menu", addMenuFromBoard);
+    return () => window.removeEventListener("flower-shoes:add-menu", addMenuFromBoard);
+  }, []);
+
+  function updateMenuQuantity(label: string, delta: number) {
     setForm((prev) => {
       const current = prev.selectedMenus[label] ?? 0;
       const next = Math.max(0, Math.min(99, current + delta));
@@ -343,74 +349,15 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
           ))}
         </fieldset>
 
-        <section className="menu-picker" aria-label="메뉴 고르기">
+        <section className="menu-picker" aria-label="장바구니">
           <div className="menu-picker-head">
-            <strong>메뉴 고르기</strong>
-            <span>{selectedMenuLabels.length > 0 ? `${selectedMenuLabels.length}종 선택` : "선택 안 함"}</span>
+            <strong>장바구니</strong>
+            <span>{selectedMenuTotalCount > 0 ? `${selectedMenuTotalCount}잔 담김` : "비어 있음"}</span>
           </div>
 
-          <div className="menu-picker-list">
-            {cafeMenu.map((category) => (
-              <div className="menu-picker-category" key={category.category}>
-                <h4>{category.category}</h4>
-                {category.menus.map((menu) => {
-                  const menuKey = getMenuKey(category.category, menu);
-                  if (hiddenMenus.includes(menuKey)) {
-                    return null;
-                  }
-
-                  const variants = getMenuVariants(menu);
-                  const isSoldOut = soldOutMenus.includes(menuKey);
-                  return (
-                    <div className={`menu-picker-item ${isSoldOut ? "sold-out" : ""}`} key={menuKey}>
-                      <div className="menu-picker-info">
-                        <span>{menu.name}</span>
-                        <small>
-                          {isSoldOut
-                            ? "품절"
-                            : variants.map((variant) => `${variant.label ? `${variant.label} ` : ""}${formatPrice(variant.price)}`).join(" / ")}
-                        </small>
-                      </div>
-                      <div className="menu-variant-list">
-                        {variants.map((variant) => {
-                          const selectedLabel = getSelectedMenuLabel(menu, variant.label);
-                          const quantity = form.selectedMenus[selectedLabel] ?? 0;
-                          return (
-                            <div className="menu-variant-row" key={selectedLabel}>
-                              <span>{variant.label || "메뉴"}</span>
-                              <div className="menu-quantity">
-                                <button
-                                  type="button"
-                                  className="quantity-button"
-                                  onClick={() => updateMenuQuantity(menu, variant.label, -1)}
-                                  disabled={quantity === 0 || isSoldOut}
-                                  aria-label={`${selectedLabel} 수량 줄이기`}
-                                >
-                                  -
-                                </button>
-                                <span>{quantity}</span>
-                                <button
-                                  type="button"
-                                  className="quantity-button"
-                                  onClick={() => updateMenuQuantity(menu, variant.label, 1)}
-                                  disabled={isSoldOut}
-                                  aria-label={`${selectedLabel} 추가`}
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-
-          {selectedMenuDetails.length > 0 && (
+          {selectedMenuDetails.length === 0 ? (
+            <p className="cart-empty-message">위 메뉴판에서 HOT, ICE 또는 가격 버튼을 눌러 담아주세요.</p>
+          ) : (
             <div className="selected-menu-summary">
               <div className="selected-menu-total">
                 <strong>총 {selectedMenuTotalCount}잔</strong>
@@ -418,9 +365,30 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
               </div>
               <div className="selected-menu-list">
                 {selectedMenuDetails.map((menu) => (
-                  <span key={menu.label}>
-                    {menu.label} x {menu.count} · {formatPrice(menu.total)}
-                  </span>
+                  <div className="cart-item-row" key={menu.label}>
+                    <span>
+                      {menu.label} x {menu.count} · {formatPrice(menu.total)}
+                    </span>
+                    <div className="menu-quantity">
+                      <button
+                        type="button"
+                        className="quantity-button"
+                        onClick={() => updateMenuQuantity(menu.label, -1)}
+                        aria-label={`${menu.label} 수량 줄이기`}
+                      >
+                        -
+                      </button>
+                      <span>{menu.count}</span>
+                      <button
+                        type="button"
+                        className="quantity-button"
+                        onClick={() => updateMenuQuantity(menu.label, 1)}
+                        aria-label={`${menu.label} 추가`}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

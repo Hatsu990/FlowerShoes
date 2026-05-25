@@ -1,8 +1,9 @@
 import Link from "next/link";
 
+import { MenuOrderBoard } from "@/components/menu/menu-order-board";
 import { ReservationForm } from "@/components/reservation/reservation-form";
 import { getAdminNotificationSettings, type AdminNotificationSettings } from "@/lib/admin/settings";
-import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
+import { cafeMenu } from "@/lib/constants/menu";
 import { defaultAboutImage, defaultHeroImage, imageBase } from "@/lib/constants/gallery";
 import { siteConfig } from "@/lib/constants/site";
 import { getKoreaDateString, getKoreaTimeString, isKoreaWeekend } from "@/lib/datetime/korea";
@@ -40,26 +41,6 @@ const spacePhotos = [
   },
 ];
 
-function formatPrice(value: number) {
-  return `${value.toLocaleString("ko-KR")}원`;
-}
-
-function getMenuPriceLabel(menu: CafeMenuItem) {
-  const labels: string[] = [];
-
-  if (typeof menu.hot === "number") {
-    labels.push(`HOT ${formatPrice(menu.hot)}`);
-  }
-  if (typeof menu.ice === "number") {
-    labels.push(`ICE ${formatPrice(menu.ice)}`);
-  }
-  if (typeof menu.price === "number") {
-    labels.push(formatPrice(menu.price));
-  }
-
-  return labels.join(" / ");
-}
-
 function getMenuKey(category: string, menuName: string) {
   return `${category}::${menuName}`;
 }
@@ -71,10 +52,6 @@ function filterVisibleMenus(settings: AdminNotificationSettings) {
       menus: category.menus.filter((menu) => !settings.hiddenMenus.includes(getMenuKey(category.category, menu.name))),
     }))
     .filter((category) => category.menus.length > 0);
-}
-
-function isMenuSoldOut(settings: AdminNotificationSettings, category: string, menuName: string) {
-  return settings.soldOutMenus.includes(getMenuKey(category, menuName));
 }
 
 function timeToMinutes(time: string) {
@@ -109,10 +86,6 @@ function getBusinessStatus(settings: AdminNotificationSettings) {
 export default async function HomePage() {
   const adminSettings = await getAdminNotificationSettings();
   const visibleMenu = filterVisibleMenus(adminSettings);
-  const visibleMenuColumns = [
-    visibleMenu.filter((_, index) => index % 2 === 0),
-    visibleMenu.filter((_, index) => index % 2 === 1),
-  ];
   const businessStatus = getBusinessStatus(adminSettings);
   const heroImage = adminSettings.heroImage || defaultHeroImage;
   const aboutPhoto = adminSettings.aboutImage || defaultAboutImage;
@@ -259,47 +232,7 @@ export default async function HomePage() {
         </div>
 
         <div className="menu-layout">
-          <div className="menu-categories-mobile">
-            {visibleMenu.map((category) => (
-              <article className="menu-category" key={category.category}>
-                <h3>{category.category}</h3>
-                <ul className="menu-list">
-                  {category.menus.map((menu) => (
-                    <li key={menu.name}>
-                      <span>{menu.name}</span>
-                      <span>
-                        {isMenuSoldOut(adminSettings, category.category, menu.name) ? "품절" : getMenuPriceLabel(menu)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-
-          <div className="menu-categories">
-            {visibleMenuColumns.map((column, columnIndex) => (
-              <div className="menu-category-column" key={columnIndex}>
-                {column.map((category) => (
-                  <article className="menu-category" key={category.category}>
-                    <h3>{category.category}</h3>
-                    <ul className="menu-list">
-                      {category.menus.map((menu) => (
-                        <li key={menu.name}>
-                          <span>{menu.name}</span>
-                          <span>
-                            {isMenuSoldOut(adminSettings, category.category, menu.name)
-                              ? "품절"
-                              : getMenuPriceLabel(menu)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </article>
-                ))}
-              </div>
-            ))}
-          </div>
+          <MenuOrderBoard categories={visibleMenu} soldOutMenus={adminSettings.soldOutMenus} />
         </div>
       </section>
 

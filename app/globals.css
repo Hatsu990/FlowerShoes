@@ -720,6 +720,35 @@ figcaption {
   font-variant-numeric: tabular-nums;
 }
 
+.menu-list li.sold-out {
+  opacity: 0.62;
+}
+
+.menu-price-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+}
+
+.menu-add-button {
+  border: 1px solid rgba(49, 95, 73, 0.18);
+  border-radius: 999px;
+  background: #fffaf2;
+  color: var(--accent-strong);
+  padding: 0.28rem 0.44rem;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.menu-add-button:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
 .reserve-cta {
   background:
     linear-gradient(90deg, rgba(31, 36, 33, 0.94), rgba(31, 36, 33, 0.76)),
@@ -1070,8 +1099,18 @@ figcaption {
 .selected-menu-summary {
   display: grid;
   gap: 0.5rem;
-  border-top: 1px solid #d8ded7;
-  padding-top: 0.65rem;
+}
+
+.cart-empty-message {
+  margin: 0;
+  border: 1px dashed #ccd5cc;
+  border-radius: 10px;
+  background: rgba(255, 252, 245, 0.72);
+  color: var(--text-soft);
+  padding: 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .selected-menu-total {
@@ -1089,18 +1128,25 @@ figcaption {
 }
 
 .selected-menu-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+  display: grid;
+  gap: 0.42rem;
 }
 
-.selected-menu-list span {
-  border-radius: 999px;
+.cart-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  border-radius: 10px;
   background: #e5efe8;
+  padding: 0.42rem 0.52rem;
+}
+
+.cart-item-row > span {
+  min-width: 0;
   color: var(--accent-strong);
-  padding: 0.28rem 0.48rem;
-  font-size: 0.76rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .reservation-form button:disabled,
