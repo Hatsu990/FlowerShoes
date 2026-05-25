@@ -356,7 +356,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
           </div>
 
           {selectedMenuDetails.length === 0 ? (
-            <p className="cart-empty-message">위 메뉴판에서 HOT, ICE 또는 가격 버튼을 눌러 담아주세요.</p>
+            <p className="cart-empty-message">위 메뉴판에서 HOT, ICE 버튼을 눌러 담아주세요.</p>
           ) : (
             <div className="selected-menu-summary">
               <div className="selected-menu-total">
