@@ -100,7 +100,6 @@ export async function createReservation(input: CreateReservationInput): Promise<
 
 export async function listReservations(filter: ReservationListFilter = {}): Promise<Reservation[]> {
   await ensureDatabaseSchema();
-  await completeExpiredReservations();
 
   const limit = Math.max(1, Math.min(filter.limit ?? 100, 500));
   const conditions: string[] = [];
