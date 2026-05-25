@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { db } from "@/lib/db/client";
 import { ensureDatabaseSchema } from "@/lib/db/init";
+import { getKoreaDateString, getKoreaTimeString } from "@/lib/datetime/korea";
 import {
   CreateReservationInput,
   Reservation,
@@ -99,6 +100,7 @@ export async function createReservation(input: CreateReservationInput): Promise<
 
 export async function listReservations(filter: ReservationListFilter = {}): Promise<Reservation[]> {
   await ensureDatabaseSchema();
+  await completeExpiredReservations();
 
   const limit = Math.max(1, Math.min(filter.limit ?? 100, 500));
   const conditions: string[] = [];
@@ -129,6 +131,27 @@ export async function listReservations(filter: ReservationListFilter = {}): Prom
 
   const result = await db.execute({ sql, args });
   return result.rows.map((row) => rowToReservation(row as DbRow));
+}
+
+export async function completeExpiredReservations(now = new Date()): Promise<number> {
+  await ensureDatabaseSchema();
+
+  const today = getKoreaDateString(now);
+  const currentTime = getKoreaTimeString(now);
+  const result = await db.execute({
+    sql: `
+      UPDATE reservations
+      SET status = 'completed'
+      WHERE status IN ('pending', 'confirmed')
+        AND (
+          date < ?
+          OR (date = ? AND time < ?)
+        )
+    `,
+    args: [today, today, currentTime],
+  });
+
+  return Number(result.rowsAffected ?? 0);
 }
 
 export async function getReservationById(id: string): Promise<Reservation | null> {
