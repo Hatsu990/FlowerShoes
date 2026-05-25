@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createReservation, listReservations } from "@/lib/reservations/service";
+import { getDailyReservationSequence } from "@/lib/reservations/repository";
 import { parseReservationStatus } from "@/lib/reservations/validation";
 
 export const dynamic = "force-dynamic";
@@ -45,8 +46,14 @@ export async function POST(request: Request) {
     );
   }
 
+  const reservationNumber = await getDailyReservationSequence(
+    result.reservation.date,
+    result.reservation.created_at,
+  );
+
   return NextResponse.json({
     ok: true,
     reservationId: result.reservation.id,
+    reservationNumber: String(reservationNumber).padStart(3, "0"),
   });
 }

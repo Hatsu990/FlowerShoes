@@ -152,6 +152,17 @@ export async function getReservationById(id: string): Promise<Reservation | null
   return rowToReservation(row as DbRow);
 }
 
+export async function getDailyReservationSequence(date: string, createdAt: string): Promise<number> {
+  await ensureDatabaseSchema();
+
+  const result = await db.execute({
+    sql: "SELECT COUNT(*) AS count FROM reservations WHERE date = ? AND created_at <= ?",
+    args: [date, createdAt],
+  });
+
+  return Number(result.rows[0]?.count ?? 1);
+}
+
 export async function updateReservationStatus(
   id: string,
   status: ReservationStatus,

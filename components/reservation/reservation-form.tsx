@@ -10,6 +10,7 @@ type SelectedMenuMap = Record<string, number>;
 type MenuTemperature = "HOT" | "ICE" | "";
 type ReservationSuccessSummary = {
   reservationId: string;
+  reservationNumber: string;
   date: string;
   time: string;
   reservationType: "매장" | "포장";
@@ -246,6 +247,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
       const json = (await response.json()) as {
         ok: boolean;
         reservationId?: string;
+        reservationNumber?: string;
         message?: string;
         errors?: string[];
       };
@@ -257,9 +259,10 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
       }
 
       setStatus("success");
-      setMessage("예약 요청이 접수되었습니다. 확인 후 연락드리겠습니다.");
+      setMessage("예약 요청이 접수되었습니다.\n확인 후 연락드릴게요 : )");
       setSuccessSummary({
         reservationId: json.reservationId ?? "",
+        reservationNumber: json.reservationNumber ?? "",
         date: today,
         time: form.time,
         reservationType: form.reservationType,
@@ -466,7 +469,10 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
               {successSummary.reservationId && (
                 <div>
                   <dt>예약번호</dt>
-                  <dd>{successSummary.reservationId}</dd>
+                  <dd>
+                    {successSummary.reservationNumber ||
+                      successSummary.reservationId.slice(0, 3).padStart(3, "0")}
+                  </dd>
                 </div>
               )}
               <div>
