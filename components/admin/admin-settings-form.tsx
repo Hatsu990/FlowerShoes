@@ -2,21 +2,20 @@
 
 import { FormEvent, useState } from "react";
 
-import type { AdminNotificationSettings, NotificationMode } from "@/lib/admin/settings";
+import type { AdminNotificationSettings } from "@/lib/admin/settings";
 import { cafeMenu } from "@/lib/constants/menu";
 
 interface AdminSettingsFormProps {
   initialSettings: AdminNotificationSettings;
-  mode?: "notification" | "business" | "menu";
+  mode: "business" | "menu";
 }
 
-export function AdminSettingsForm({ initialSettings, mode = "notification" }: AdminSettingsFormProps) {
+export function AdminSettingsForm({ initialSettings, mode }: AdminSettingsFormProps) {
   const [settings, setSettings] = useState(initialSettings);
   const [closedDateInput, setClosedDateInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [instantSavingKey, setInstantSavingKey] = useState("");
   const [message, setMessage] = useState("");
-  const [testAlert, setTestAlert] = useState("");
 
   function getMenuKey(category: string, menuName: string) {
     return `${category}::${menuName}`;
@@ -68,16 +67,6 @@ export function AdminSettingsForm({ initialSettings, mode = "notification" }: Ad
     }
   }
 
-  function previewAlert() {
-    const modeLabel =
-      settings.notificationMode === "both" ? "앱 + 문자" : settings.notificationMode === "sms" ? "문자" : "앱";
-    setTestAlert(
-      `[${modeLabel} 테스트] ${settings.orderSoundLabel || "새 주문이 들어왔습니다"} / 수신: ${
-        settings.phone || "휴대폰 미입력"
-      }`,
-    );
-  }
-
   function addClosedDate() {
     if (!closedDateInput || settings.closedDates.includes(closedDateInput)) {
       return;
@@ -114,70 +103,6 @@ export function AdminSettingsForm({ initialSettings, mode = "notification" }: Ad
 
   return (
     <form className="admin-settings-form" onSubmit={onSubmit}>
-      {mode === "notification" && (
-        <>
-          <label>
-            사장님 이름
-            <input
-              name="ownerName"
-              autoComplete="name"
-              value={settings.ownerName}
-              onChange={(event) => setSettings((prev) => ({ ...prev, ownerName: event.target.value }))}
-              placeholder="홍길동"
-            />
-          </label>
-
-          <label>
-            알림 받을 휴대폰
-            <input
-              name="phone"
-              autoComplete="tel"
-              inputMode="tel"
-              value={settings.phone}
-              onChange={(event) => setSettings((prev) => ({ ...prev, phone: event.target.value }))}
-              placeholder="010-0000-0000"
-            />
-          </label>
-
-          <label>
-            알림 방식
-            <select
-              name="notificationMode"
-              value={settings.notificationMode}
-              onChange={(event) =>
-                setSettings((prev) => ({ ...prev, notificationMode: event.target.value as NotificationMode }))
-              }
-            >
-              <option value="app">사장님 알림 앱</option>
-              <option value="sms">문자 SMS</option>
-              <option value="both">앱 + 문자</option>
-            </select>
-          </label>
-
-          <label>
-            알림 문구
-            <input
-              name="orderSoundLabel"
-              autoComplete="off"
-              value={settings.orderSoundLabel}
-              onChange={(event) => setSettings((prev) => ({ ...prev, orderSoundLabel: event.target.value }))}
-              placeholder="새 주문이 들어왔습니다"
-            />
-          </label>
-
-          <div className="admin-settings-group">
-            <h2>알림 테스트</h2>
-            <p className="admin-settings-muted">
-              실제 발송은 아직 연결 전입니다. 저장된 알림 방식과 문구가 어떻게 보일지 미리 확인합니다.
-            </p>
-            <button type="button" onClick={previewAlert}>
-              테스트 알림 미리보기
-            </button>
-            {testAlert && <p className="admin-settings-preview">{testAlert}</p>}
-          </div>
-        </>
-      )}
-
       {mode === "business" && (
         <>
           <div className="admin-settings-group">

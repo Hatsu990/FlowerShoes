@@ -1,14 +1,10 @@
 import { AdminNav } from "@/components/admin/admin-nav";
-import { AdminSettingsForm } from "@/components/admin/admin-settings-form";
 import { PushNotificationControl } from "@/components/admin/push-notification-control";
-import { getAdminNotificationSettings } from "@/lib/admin/settings";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function AdminSettingsPage() {
-  const settings = await getAdminNotificationSettings();
-
   return (
     <main className="admin-detail-page">
       <header className="admin-header">
@@ -21,10 +17,9 @@ export default async function AdminSettingsPage() {
 
       <section className="admin-detail-card">
         <p className="admin-settings-intro">
-          새 예약 접수 시 사장님에게 어떤 방식과 문구로 알릴지 관리합니다.
+          새 예약이 들어왔을 때 이 기기에서 웹 푸시 알림을 받을 수 있게 설정합니다.
         </p>
         <PushNotificationControl />
-        <AdminSettingsForm initialSettings={settings} mode="notification" />
       </section>
     </main>
   );
