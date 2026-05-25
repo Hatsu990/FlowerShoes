@@ -5,7 +5,7 @@ import { getAdminNotificationSettings } from "@/lib/admin/settings";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function AdminSettingsPage() {
+export default async function AdminBusinessPage() {
   const settings = await getAdminNotificationSettings();
 
   return (
@@ -13,16 +13,14 @@ export default async function AdminSettingsPage() {
       <header className="admin-header">
         <div>
           <p>Admin</p>
-          <h1>알림 설정</h1>
+          <h1>영업/휴무 설정</h1>
         </div>
-        <AdminNav active="settings" />
+        <AdminNav active="business" />
       </header>
 
       <section className="admin-detail-card">
-        <p className="admin-settings-intro">
-          새 예약 접수 시 사장님에게 어떤 방식과 문구로 알릴지 관리합니다.
-        </p>
-        <AdminSettingsForm initialSettings={settings} mode="notification" />
+        <p className="admin-settings-intro">예약 가능 시간과 휴무일을 관리합니다.</p>
+        <AdminSettingsForm initialSettings={settings} mode="business" />
       </section>
     </main>
   );

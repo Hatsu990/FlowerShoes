@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AdminNav } from "@/components/admin/admin-nav";
 import { StatusSelector } from "@/components/admin/status-selector";
 import { getReservationById } from "@/lib/reservations/service";
 import { reservationStatusLabels } from "@/lib/reservations/types";
@@ -38,11 +38,7 @@ export default async function ReservationDetailPage({ params }: PageProps) {
           <p>Admin</p>
           <h1>예약 상세</h1>
         </div>
-        <div className="admin-header-actions">
-          <Link href="/admin/reservations">예약 목록</Link>
-          <Link href="/admin/settings">알림 설정</Link>
-          <Link href="/">홈으로</Link>
-        </div>
+        <AdminNav active="reservations" />
       </header>
 
       <section className="admin-detail-card">

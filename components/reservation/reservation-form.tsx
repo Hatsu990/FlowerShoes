@@ -8,6 +8,15 @@ import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
 type FormStatus = "idle" | "loading" | "success" | "error";
 type SelectedMenuMap = Record<string, number>;
 type MenuTemperature = "HOT" | "ICE" | "";
+type ReservationSuccessSummary = {
+  reservationId: string;
+  date: string;
+  time: string;
+  reservationType: "매장" | "포장";
+  menus: string[];
+  totalCount: number;
+  totalPrice: number;
+};
 
 const initialFormState = {
   name: "",
@@ -116,7 +125,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
   const [adminSettings, setAdminSettings] = useState<AdminNotificationSettings | null>(null);
   const [status, setStatus] = useState<FormStatus>("idle");
   const [message, setMessage] = useState("");
-  const [reservationId, setReservationId] = useState("");
+  const [successSummary, setSuccessSummary] = useState<ReservationSuccessSummary | null>(null);
 
   const isLoading = status === "loading";
   const buttonText = useMemo(() => {
@@ -168,6 +177,8 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
   const isBusinessOpen = isDeveloperAlwaysOpen || (!isClosedDate && nowMinutes >= openMinutes && nowMinutes <= closeMinutes);
   const submitDisabled = isLoading || !isBusinessOpen;
   const submitText = isBusinessOpen ? buttonText : "영업이 종료되었습니다";
+  const hiddenMenus = adminSettings?.hiddenMenus ?? [];
+  const soldOutMenus = adminSettings?.soldOutMenus ?? [];
 
   useEffect(() => {
     let mounted = true;
@@ -217,7 +228,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
     event.preventDefault();
     setStatus("loading");
     setMessage("");
-    setReservationId("");
+    setSuccessSummary(null);
 
     try {
       const payload = {
@@ -246,8 +257,16 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
       }
 
       setStatus("success");
-      setReservationId(json.reservationId ?? "");
       setMessage("예약 요청이 접수되었습니다. 확인 후 연락드리겠습니다.");
+      setSuccessSummary({
+        reservationId: json.reservationId ?? "",
+        date: today,
+        time: form.time,
+        reservationType: form.reservationType,
+        menus: selectedMenuLabels,
+        totalCount: selectedMenuTotalCount,
+        totalPrice: selectedMenuTotalPrice,
+      });
       setForm((prev) => ({ ...initialFormState, reservationType: prev.reservationType }));
     } catch (error) {
       console.error(error);
@@ -349,12 +368,21 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
                 <h4>{category.category}</h4>
                 {category.menus.map((menu) => {
                   const menuKey = getMenuKey(category.category, menu);
+                  if (hiddenMenus.includes(menuKey)) {
+                    return null;
+                  }
+
                   const variants = getMenuVariants(menu);
+                  const isSoldOut = soldOutMenus.includes(menuKey);
                   return (
-                    <div className="menu-picker-item" key={menuKey}>
+                    <div className={`menu-picker-item ${isSoldOut ? "sold-out" : ""}`} key={menuKey}>
                       <div className="menu-picker-info">
                         <span>{menu.name}</span>
-                        <small>{variants.map((variant) => `${variant.label ? `${variant.label} ` : ""}${formatPrice(variant.price)}`).join(" / ")}</small>
+                        <small>
+                          {isSoldOut
+                            ? "품절"
+                            : variants.map((variant) => `${variant.label ? `${variant.label} ` : ""}${formatPrice(variant.price)}`).join(" / ")}
+                        </small>
                       </div>
                       <div className="menu-variant-list">
                         {variants.map((variant) => {
@@ -368,7 +396,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
                                   type="button"
                                   className="quantity-button"
                                   onClick={() => updateMenuQuantity(menu, variant.label, -1)}
-                                  disabled={quantity === 0}
+                                  disabled={quantity === 0 || isSoldOut}
                                   aria-label={`${selectedLabel} 수량 줄이기`}
                                 >
                                   -
@@ -378,6 +406,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
                                   type="button"
                                   className="quantity-button"
                                   onClick={() => updateMenuQuantity(menu, variant.label, 1)}
+                                  disabled={isSoldOut}
                                   aria-label={`${selectedLabel} 추가`}
                                 >
                                   +
@@ -430,10 +459,41 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
       </form>
 
       {status === "success" && (
-        <p className="reservation-feedback success" aria-live="polite">
-          {message}
-          {reservationId ? ` (예약번호: ${reservationId})` : ""}
-        </p>
+        <div className="reservation-success-card" aria-live="polite">
+          <strong>{message}</strong>
+          {successSummary && (
+            <dl>
+              {successSummary.reservationId && (
+                <div>
+                  <dt>예약번호</dt>
+                  <dd>{successSummary.reservationId}</dd>
+                </div>
+              )}
+              <div>
+                <dt>방문일</dt>
+                <dd>{successSummary.date}</dd>
+              </div>
+              <div>
+                <dt>방문 시간</dt>
+                <dd>{successSummary.time}</dd>
+              </div>
+              <div>
+                <dt>예약 유형</dt>
+                <dd>{successSummary.reservationType}</dd>
+              </div>
+              <div>
+                <dt>선택 메뉴</dt>
+                <dd>{successSummary.menus.length > 0 ? successSummary.menus.join(", ") : "-"}</dd>
+              </div>
+              <div>
+                <dt>합계</dt>
+                <dd>
+                  총 {successSummary.totalCount}잔 · {formatPrice(successSummary.totalPrice)}
+                </dd>
+              </div>
+            </dl>
+          )}
+        </div>
       )}
       {status === "error" && (
         <p className="reservation-feedback error" aria-live="polite">

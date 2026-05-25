@@ -2,11 +2,12 @@ import Link from "next/link";
 
 import { MenuBoardViewer } from "@/components/menu/menu-board-viewer";
 import { ReservationForm } from "@/components/reservation/reservation-form";
+import { getAdminNotificationSettings, type AdminNotificationSettings } from "@/lib/admin/settings";
 import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
+import { defaultAboutImage, defaultHeroImage, imageBase } from "@/lib/constants/gallery";
 import { siteConfig } from "@/lib/constants/site";
 
-const imageBase = "/images/kkotsin";
-const aboutPhoto = `${imageBase}/hongcheon-kkotsin-13.jpg`;
+const menuBoardImage = `${imageBase}/hongcheon-kkotsin-08.png`;
 
 const spacePhotos = [
   {
@@ -61,12 +62,76 @@ function getMenuPriceLabel(menu: CafeMenuItem) {
   return labels.join(" / ");
 }
 
-const menuColumns = [
-  cafeMenu.filter((_, index) => index % 2 === 0),
-  cafeMenu.filter((_, index) => index % 2 === 1),
-];
+function getMenuKey(category: string, menuName: string) {
+  return `${category}::${menuName}`;
+}
 
-export default function HomePage() {
+function filterVisibleMenus(settings: AdminNotificationSettings) {
+  return cafeMenu
+    .map((category) => ({
+      ...category,
+      menus: category.menus.filter((menu) => !settings.hiddenMenus.includes(getMenuKey(category.category, menu.name))),
+    }))
+    .filter((category) => category.menus.length > 0);
+}
+
+function isMenuSoldOut(settings: AdminNotificationSettings, category: string, menuName: string) {
+  return settings.soldOutMenus.includes(getMenuKey(category, menuName));
+}
+
+function isWeekend(date: Date) {
+  const day = date.getDay();
+  return day === 0 || day === 6;
+}
+
+function timeToMinutes(time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
+function getTodayDateString(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getBusinessStatus(settings: AdminNotificationSettings) {
+  const now = new Date();
+  const today = getTodayDateString(now);
+
+  if (!settings.developerAlwaysOpen && settings.closedDates.includes(today)) {
+    return { label: "오늘 휴무", detail: "오늘은 예약 접수가 쉬어갑니다.", open: false };
+  }
+
+  const hours = settings.developerAlwaysOpen
+    ? { open: "00:00", close: "23:50" }
+    : isWeekend(now)
+      ? { open: settings.weekendOpen, close: settings.weekendClose }
+      : { open: settings.weekdayOpen, close: settings.weekdayClose };
+  const current = now.getHours() * 60 + now.getMinutes();
+  const open = timeToMinutes(hours.open);
+  const close = timeToMinutes(hours.close);
+  const isOpen = settings.developerAlwaysOpen || (current >= open && current <= close);
+
+  return {
+    label: isOpen ? "현재 영업 중" : "영업 종료",
+    detail: `오늘 영업시간 ${hours.open} - ${hours.close}`,
+    open: isOpen,
+  };
+}
+
+export default async function HomePage() {
+  const adminSettings = await getAdminNotificationSettings();
+  const visibleMenu = filterVisibleMenus(adminSettings);
+  const visibleMenuColumns = [
+    visibleMenu.filter((_, index) => index % 2 === 0),
+    visibleMenu.filter((_, index) => index % 2 === 1),
+  ];
+  const businessStatus = getBusinessStatus(adminSettings);
+  const heroImage = adminSettings.heroImage || defaultHeroImage;
+  const aboutPhoto = adminSettings.aboutImage || defaultAboutImage;
+
   return (
     <>
       <a className="skip-link" href="#main-content">
@@ -89,13 +154,17 @@ export default function HomePage() {
       <section className="hero">
         <img
           className="hero-photo"
-          src={`${imageBase}/hongcheon-kkotsin-05.jpg`}
+          src={heroImage}
           width={2048}
           height={1152}
           fetchPriority="high"
           alt="홍천 꽃신의 큰 창과 식물이 보이는 현대적인 실내 좌석"
         />
         <div className="hero-copy">
+          <div className={`business-status ${businessStatus.open ? "open" : "closed"}`}>
+            <strong>{businessStatus.label}</strong>
+            <span>{businessStatus.detail}</span>
+          </div>
           <h1>
             오늘은 조금 천천히
             <br />
@@ -207,19 +276,21 @@ export default function HomePage() {
 
         <div className="menu-layout">
           <figure className="menu-photo-card">
-            <MenuBoardViewer src={`${imageBase}/hongcheon-kkotsin-08.png`} alt="홍천 꽃신 전체 메뉴판" />
+            <MenuBoardViewer src={menuBoardImage} alt="홍천 꽃신 전체 메뉴판" />
             <figcaption>매장 메뉴판 사진</figcaption>
           </figure>
 
           <div className="menu-categories-mobile">
-            {cafeMenu.map((category) => (
+            {visibleMenu.map((category) => (
               <article className="menu-category" key={category.category}>
                 <h3>{category.category}</h3>
                 <ul className="menu-list">
                   {category.menus.map((menu) => (
                     <li key={menu.name}>
                       <span>{menu.name}</span>
-                      <span>{getMenuPriceLabel(menu)}</span>
+                      <span>
+                        {isMenuSoldOut(adminSettings, category.category, menu.name) ? "품절" : getMenuPriceLabel(menu)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -228,7 +299,7 @@ export default function HomePage() {
           </div>
 
           <div className="menu-categories">
-            {menuColumns.map((column, columnIndex) => (
+            {visibleMenuColumns.map((column, columnIndex) => (
               <div className="menu-category-column" key={columnIndex}>
                 {column.map((category) => (
                   <article className="menu-category" key={category.category}>
@@ -237,7 +308,11 @@ export default function HomePage() {
                       {category.menus.map((menu) => (
                         <li key={menu.name}>
                           <span>{menu.name}</span>
-                          <span>{getMenuPriceLabel(menu)}</span>
+                          <span>
+                            {isMenuSoldOut(adminSettings, category.category, menu.name)
+                              ? "품절"
+                              : getMenuPriceLabel(menu)}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -263,6 +338,9 @@ export default function HomePage() {
         <p>{siteConfig.name}</p>
         <p>홍천 신장대리에 피어난 카페</p>
       </footer>
+      <a className="mobile-reserve-button" href="#reserve-cta">
+        방문 예약하기
+      </a>
     </main>
     </>
   );

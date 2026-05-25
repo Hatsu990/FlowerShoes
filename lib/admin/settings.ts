@@ -1,5 +1,6 @@
 import { db } from "@/lib/db/client";
-import { ensureDatabaseSchema } from "@/lib/db/init";
+import { defaultAboutImage, defaultHeroImage, galleryImages } from "@/lib/constants/gallery";
+import { ADMIN_SETTINGS_TABLE_SQL } from "@/lib/db/schema";
 
 export type NotificationMode = "sms" | "app" | "both";
 
@@ -14,9 +15,17 @@ export interface AdminNotificationSettings {
   weekendClose: string;
   closedDates: string[];
   developerAlwaysOpen: boolean;
+  soldOutMenus: string[];
+  hiddenMenus: string[];
+  heroImage: string;
+  aboutImage: string;
 }
 
 const settingsKey = "notification";
+const settingsCacheMs = 30_000;
+
+let settingsInitPromise: Promise<void> | null = null;
+let settingsCache: { value: AdminNotificationSettings; expiresAt: number } | null = null;
 
 const defaultSettings: AdminNotificationSettings = {
   ownerName: "",
@@ -29,6 +38,10 @@ const defaultSettings: AdminNotificationSettings = {
   weekendClose: "20:00",
   closedDates: [],
   developerAlwaysOpen: false,
+  soldOutMenus: [],
+  hiddenMenus: [],
+  heroImage: defaultHeroImage,
+  aboutImage: defaultAboutImage,
 };
 
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -46,6 +59,25 @@ function parseClosedDates(value: unknown) {
   return value
     .filter((date): date is string => typeof date === "string" && datePattern.test(date))
     .slice(0, 120);
+}
+
+function parseStringList(value: unknown, limit = 200) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    .map((item) => item.trim().slice(0, 120))
+    .slice(0, limit);
+}
+
+function parseGalleryImage(value: unknown, fallback: string) {
+  if (typeof value !== "string") {
+    return fallback;
+  }
+
+  return galleryImages.some((image) => image.value === value) ? value : fallback;
 }
 
 function parseSettings(value: unknown): AdminNotificationSettings {
@@ -72,27 +104,50 @@ function parseSettings(value: unknown): AdminNotificationSettings {
       weekendClose: parseTime(parsed.weekendClose, defaultSettings.weekendClose),
       closedDates: parseClosedDates(parsed.closedDates),
       developerAlwaysOpen: parsed.developerAlwaysOpen === true,
+      soldOutMenus: parseStringList(parsed.soldOutMenus),
+      hiddenMenus: parseStringList(parsed.hiddenMenus),
+      heroImage: parseGalleryImage(parsed.heroImage, defaultSettings.heroImage),
+      aboutImage: parseGalleryImage(parsed.aboutImage, defaultSettings.aboutImage),
     };
   } catch {
     return defaultSettings;
   }
 }
 
+async function ensureAdminSettingsSchema() {
+  if (!settingsInitPromise) {
+    settingsInitPromise = db.execute(ADMIN_SETTINGS_TABLE_SQL).then(() => undefined);
+  }
+
+  await settingsInitPromise;
+}
+
 export async function getAdminNotificationSettings(): Promise<AdminNotificationSettings> {
-  await ensureDatabaseSchema();
+  const now = Date.now();
+  if (settingsCache && settingsCache.expiresAt > now) {
+    return settingsCache.value;
+  }
+
+  await ensureAdminSettingsSchema();
 
   const result = await db.execute({
     sql: "SELECT value FROM admin_settings WHERE key = ? LIMIT 1",
     args: [settingsKey],
   });
 
-  return parseSettings(result.rows[0]?.value);
+  const settings = parseSettings(result.rows[0]?.value);
+  settingsCache = {
+    value: settings,
+    expiresAt: now + settingsCacheMs,
+  };
+
+  return settings;
 }
 
 export async function updateAdminNotificationSettings(
   input: Partial<AdminNotificationSettings>,
 ): Promise<AdminNotificationSettings> {
-  await ensureDatabaseSchema();
+  await ensureAdminSettingsSchema();
 
   const next: AdminNotificationSettings = {
     ownerName: String(input.ownerName ?? "").trim().slice(0, 40),
@@ -110,6 +165,10 @@ export async function updateAdminNotificationSettings(
     weekendClose: parseTime(input.weekendClose, defaultSettings.weekendClose),
     closedDates: parseClosedDates(input.closedDates),
     developerAlwaysOpen: input.developerAlwaysOpen === true,
+    soldOutMenus: parseStringList(input.soldOutMenus),
+    hiddenMenus: parseStringList(input.hiddenMenus),
+    heroImage: parseGalleryImage(input.heroImage, defaultSettings.heroImage),
+    aboutImage: parseGalleryImage(input.aboutImage, defaultSettings.aboutImage),
   };
 
   await db.execute({
@@ -120,6 +179,11 @@ export async function updateAdminNotificationSettings(
     `,
     args: [settingsKey, JSON.stringify(next), new Date().toISOString()],
   });
+
+  settingsCache = {
+    value: next,
+    expiresAt: Date.now() + settingsCacheMs,
+  };
 
   return next;
 }
