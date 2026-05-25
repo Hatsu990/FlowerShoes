@@ -32,6 +32,22 @@ export function getKoreaTimeString(date = new Date()) {
   return `${parts.hour}:${parts.minute}`;
 }
 
+export function timeToMinutes(time: string) {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
+export function minutesToTime(value: number) {
+  const normalized = Math.max(0, Math.min(value, 23 * 60 + 59));
+  const hour = Math.floor(normalized / 60);
+  const minute = normalized % 60;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+export function ceilToStep(value: number, step: number) {
+  return Math.ceil(value / step) * step;
+}
+
 export function isKoreaWeekend(dateString: string) {
   const [year, month, day] = dateString.split("-").map(Number);
   const utcTime = Date.UTC(year, month - 1, day);

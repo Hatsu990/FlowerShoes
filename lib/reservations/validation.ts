@@ -1,5 +1,5 @@
 import type { AdminNotificationSettings } from "@/lib/admin/settings";
-import { getKoreaDateString, getKoreaTimeString, isKoreaWeekend } from "@/lib/datetime/korea";
+import { ceilToStep, getKoreaDateString, getKoreaTimeString, isKoreaWeekend, timeToMinutes } from "@/lib/datetime/korea";
 import {
   CreateReservationInput,
   ReservationStatus,
@@ -19,11 +19,6 @@ function toTrimmedString(value: unknown): string {
     return "";
   }
   return value.trim();
-}
-
-function timeToMinutes(time: string) {
-  const [hour, minute] = time.split(":").map(Number);
-  return hour * 60 + minute;
 }
 
 function getBusinessHours(settings: AdminNotificationSettings, dateString: string) {
@@ -94,12 +89,17 @@ export function validateCreateReservationInput(
     const hours = getBusinessHours(adminSettings, date);
     const open = timeToMinutes(hours.open);
     const close = timeToMinutes(hours.close);
+    const earliestReservable = Math.max(open, ceilToStep(current, timeStepMinutes));
 
-    if (!adminSettings.developerAlwaysOpen && (current < open || current > close)) {
+    if (!adminSettings.developerAlwaysOpen && (current < open || current >= close)) {
       errors.push("영업이 종료되었습니다.");
     }
 
-    if (requested < open || requested > close) {
+    if (date === today && requested < earliestReservable) {
+      errors.push("현재 시간 이후의 예약 시간만 선택해주세요.");
+    }
+
+    if (requested < open || requested >= close) {
       errors.push("영업시간 내 시간만 선택해주세요.");
     }
   }

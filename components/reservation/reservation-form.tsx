@@ -4,6 +4,14 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import type { AdminNotificationSettings } from "@/lib/admin/settings";
 import { cafeMenu, type CafeMenuItem } from "@/lib/constants/menu";
+import {
+  ceilToStep,
+  getKoreaDateString,
+  getKoreaTimeString,
+  isKoreaWeekend,
+  minutesToTime,
+  timeToMinutes,
+} from "@/lib/datetime/korea";
 
 type FormStatus = "idle" | "loading" | "success" | "error";
 type SelectedMenuMap = Record<string, number>;
@@ -60,38 +68,6 @@ function getSelectedMenuLabel(menu: CafeMenuItem, variant: MenuTemperature) {
   return variant ? `${menu.name} ${variant}` : menu.name;
 }
 
-function timeToMinutes(time: string) {
-  const [hour, minute] = time.split(":").map(Number);
-  return hour * 60 + minute;
-}
-
-function minutesToTime(value: number) {
-  const hour = Math.floor(value / 60);
-  const minute = value % 60;
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-}
-
-function isWeekend(dateString: string) {
-  if (!dateString) {
-    return false;
-  }
-  const day = new Date(`${dateString}T00:00:00`).getDay();
-  return day === 0 || day === 6;
-}
-
-function getTodayDateString() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function getTodayTimeString() {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-}
-
 function getBusinessHours(settings: AdminNotificationSettings | null, dateString: string) {
   if (settings?.developerAlwaysOpen) {
     return { open: "00:00", close: "23:50" };
@@ -101,19 +77,21 @@ function getBusinessHours(settings: AdminNotificationSettings | null, dateString
     return { open: "10:00", close: "20:00" };
   }
 
-  if (isWeekend(dateString)) {
+  if (isKoreaWeekend(dateString)) {
     return { open: settings.weekendOpen, close: settings.weekendClose };
   }
 
   return { open: settings.weekdayOpen, close: settings.weekdayClose };
 }
 
-function getTimeOptions(settings: AdminNotificationSettings | null, dateString: string) {
+function getTimeOptions(settings: AdminNotificationSettings | null, dateString: string, currentTime: string) {
   const hours = getBusinessHours(settings, dateString);
   const open = timeToMinutes(hours.open);
   const close = timeToMinutes(hours.close);
+  const current = timeToMinutes(currentTime);
+  const start = Math.max(open, ceilToStep(current, 10));
   const options: string[] = [];
-  for (let value = open; value <= close; value += 10) {
+  for (let value = start; value < close; value += 10) {
     options.push(minutesToTime(value));
   }
   return options;
@@ -121,8 +99,8 @@ function getTimeOptions(settings: AdminNotificationSettings | null, dateString: 
 
 export function ReservationForm({ title = "예약 요청", compact = false }: ReservationFormProps) {
   const [form, setForm] = useState(initialFormState);
-  const [today, setToday] = useState(getTodayDateString);
-  const [currentTime, setCurrentTime] = useState(getTodayTimeString);
+  const [today, setToday] = useState(getKoreaDateString);
+  const [currentTime, setCurrentTime] = useState(getKoreaTimeString);
   const [adminSettings, setAdminSettings] = useState<AdminNotificationSettings | null>(null);
   const [status, setStatus] = useState<FormStatus>("idle");
   const [message, setMessage] = useState("");
@@ -168,14 +146,14 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
   }, [form.selectedMenus]);
   const selectedMenuTotalCount = selectedMenuDetails.reduce((sum, item) => sum + item.count, 0);
   const selectedMenuTotalPrice = selectedMenuDetails.reduce((sum, item) => sum + item.total, 0);
-  const timeOptions = useMemo(() => getTimeOptions(adminSettings, today), [adminSettings, today]);
+  const timeOptions = useMemo(() => getTimeOptions(adminSettings, today, currentTime), [adminSettings, today, currentTime]);
   const isDeveloperAlwaysOpen = adminSettings?.developerAlwaysOpen ?? false;
   const isClosedDate = !isDeveloperAlwaysOpen && (adminSettings?.closedDates.includes(today) ?? false);
   const businessHours = getBusinessHours(adminSettings, today);
   const nowMinutes = timeToMinutes(currentTime);
   const openMinutes = timeToMinutes(businessHours.open);
   const closeMinutes = timeToMinutes(businessHours.close);
-  const isBusinessOpen = isDeveloperAlwaysOpen || (!isClosedDate && nowMinutes >= openMinutes && nowMinutes <= closeMinutes);
+  const isBusinessOpen = isDeveloperAlwaysOpen || (!isClosedDate && nowMinutes >= openMinutes && nowMinutes < closeMinutes);
   const submitDisabled = isLoading || !isBusinessOpen;
   const submitText = isBusinessOpen ? buttonText : "영업이 종료되었습니다";
   const hiddenMenus = adminSettings?.hiddenMenus ?? [];
@@ -198,8 +176,8 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
 
     loadSettings();
     const interval = window.setInterval(() => {
-      setToday(getTodayDateString());
-      setCurrentTime(getTodayTimeString());
+      setToday(getKoreaDateString());
+      setCurrentTime(getKoreaTimeString());
     }, 30000);
 
     return () => {
@@ -207,6 +185,12 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
       window.clearInterval(interval);
     };
   }, []);
+
+  useEffect(() => {
+    if (form.time && !timeOptions.includes(form.time)) {
+      setForm((prev) => ({ ...prev, time: "" }));
+    }
+  }, [form.time, timeOptions]);
 
   function updateMenuQuantity(menu: CafeMenuItem, variant: MenuTemperature, delta: number) {
     const label = getSelectedMenuLabel(menu, variant);
