@@ -226,9 +226,8 @@ export default async function HomePage() {
       </section>
 
       <section id="menu-board" className="section menu-board">
-        <div className="section-head immersive">
-          <p>Menu</p>
-          <h2>메뉴판</h2>
+        <div className="menu-board-title">
+          <h2>MENU</h2>
         </div>
 
         <div className="menu-layout">

@@ -202,7 +202,7 @@ export function AdminSettingsForm({ initialSettings, mode }: AdminSettingsFormPr
         <div className="admin-settings-group">
           <h2>메뉴 운영</h2>
           <p className="admin-settings-muted">
-            품절은 예약 메뉴에서 선택할 수 없게 표시하고, 숨김은 예약 메뉴에서 보이지 않게 처리합니다.
+            품절은 메뉴판에서 선택할 수 없게 표시하고, 숨김은 메뉴판에서 보이지 않게 처리합니다.
           </p>
           <div className="admin-menu-control-list">
             {cafeMenu.map((category) => (

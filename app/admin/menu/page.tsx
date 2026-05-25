@@ -19,7 +19,7 @@ export default async function AdminMenuPage() {
       </header>
 
       <section className="admin-detail-card">
-        <p className="admin-settings-intro">예약 화면에 노출할 메뉴와 품절 상태를 관리합니다.</p>
+        <p className="admin-settings-intro">메뉴판에 노출할 메뉴와 품절 상태를 관리합니다.</p>
         <AdminSettingsForm initialSettings={settings} mode="menu" />
       </section>
     </main>

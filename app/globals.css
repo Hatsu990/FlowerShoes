@@ -573,6 +573,21 @@ figcaption {
   background: var(--bg-paper);
 }
 
+.menu-board-title {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.menu-board-title h2 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: clamp(2.4rem, 9vw, 5.6rem);
+  line-height: 0.95;
+  font-weight: 900;
+}
+
 .menu-layout {
   display: grid;
   gap: 1rem;
