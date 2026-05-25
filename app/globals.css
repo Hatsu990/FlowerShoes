@@ -1980,10 +1980,6 @@ figcaption {
     padding: 0.4rem 0.55rem;
   }
 
-  .top-nav-actions a[href="/admin/reservations"] {
-    display: none;
-  }
-
   .image-grid-large {
     grid-template-columns: 1fr;
   }

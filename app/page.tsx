@@ -132,7 +132,6 @@ export default async function HomePage() {
         </div>
         <div className="top-nav-actions">
           <a href="#menu-board">메뉴</a>
-          <Link href="/admin/reservations">관리자</Link>
           <a className="primary" href="#reserve-cta">
             예약하기
           </a>
