@@ -3068,8 +3068,8 @@ figcaption {
   }
 
   .landing > .hero {
-    min-height: 98svh;
-    padding: 7.45rem 1rem 5.05rem;
+    min-height: 103svh;
+    padding: 7.75rem 1rem 5.3rem;
   }
 
   .landing > .hero .hero-copy h1 {
