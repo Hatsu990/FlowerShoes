@@ -157,7 +157,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
 
     async function loadSettings() {
       try {
-        const response = await fetch("/api/admin/settings");
+        const response = await fetch("/api/admin/settings", { cache: "no-store" });
         const json = (await response.json()) as { ok: boolean; settings?: AdminNotificationSettings };
         if (mounted && json.ok && json.settings) {
           setAdminSettings(json.settings);

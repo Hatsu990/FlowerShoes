@@ -2962,6 +2962,22 @@ figcaption {
   line-height: 1.2;
 }
 
+.mobile-only-break {
+  display: none;
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .order-workspace {
+    width: min(100%, 760px);
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .order-reserve-panel {
+    position: static;
+  }
+}
+
 @media (max-width: 900px) {
   .hero-shell,
   .editorial-map-section,
@@ -3052,8 +3068,8 @@ figcaption {
   }
 
   .landing > .hero {
-    min-height: 82svh;
-    padding: 6.2rem 1rem 4.2rem;
+    min-height: 107svh;
+    padding: 8.1rem 1rem 5.5rem;
   }
 
   .landing > .hero .hero-copy h1 {
@@ -3074,6 +3090,14 @@ figcaption {
   .runway-head h2,
   .order-head h2 {
     font-size: clamp(2rem, 11vw, 3.1rem);
+  }
+
+  .runway-head h2 {
+    line-height: 1.06;
+  }
+
+  .mobile-only-break {
+    display: block;
   }
 
   .story-layout,
@@ -3106,5 +3130,11 @@ figcaption {
   .order-menu-panel,
   .order-reserve-panel {
     border-radius: 22px;
+  }
+
+  .time-select-wrap select {
+    min-height: 56px;
+    padding: 0.68rem 2.6rem 0.68rem 0.85rem;
+    font-size: 0.96rem;
   }
 }

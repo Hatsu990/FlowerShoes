@@ -67,6 +67,27 @@ export function AdminSettingsForm({ initialSettings, mode }: AdminSettingsFormPr
     }
   }
 
+  async function updateDeveloperAlwaysOpen(checked: boolean) {
+    const nextSettings: AdminNotificationSettings = {
+      ...settings,
+      developerAlwaysOpen: checked,
+    };
+
+    setSettings(nextSettings);
+    setSaving(true);
+    setMessage("");
+
+    try {
+      await saveSettings(nextSettings, "24시간 운영 설정이 저장되었습니다.");
+    } catch (error) {
+      console.error(error);
+      setSettings(settings);
+      setMessage(error instanceof Error ? error.message : "통신 오류가 발생했습니다.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function addClosedDate() {
     if (!closedDateInput || settings.closedDates.includes(closedDateInput)) {
       return;
@@ -112,9 +133,8 @@ export function AdminSettingsForm({ initialSettings, mode }: AdminSettingsFormPr
                 name="developerAlwaysOpen"
                 type="checkbox"
                 checked={settings.developerAlwaysOpen}
-                onChange={(event) =>
-                  setSettings((prev) => ({ ...prev, developerAlwaysOpen: event.target.checked }))
-                }
+                disabled={saving}
+                onChange={(event) => updateDeveloperAlwaysOpen(event.target.checked)}
               />
               <span>
                 <strong>개발자 모드</strong>

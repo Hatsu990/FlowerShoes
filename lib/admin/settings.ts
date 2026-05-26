@@ -23,7 +23,7 @@ export interface AdminNotificationSettings {
 }
 
 const settingsKey = "notification";
-const settingsCacheMs = 30_000;
+const settingsCacheMs = 0;
 
 let settingsInitPromise: Promise<void> | null = null;
 let settingsCache: { value: AdminNotificationSettings; expiresAt: number } | null = null;
@@ -125,7 +125,7 @@ async function ensureAdminSettingsSchema() {
 
 export async function getAdminNotificationSettings(): Promise<AdminNotificationSettings> {
   const now = Date.now();
-  if (settingsCache && settingsCache.expiresAt > now) {
+  if (settingsCacheMs > 0 && settingsCache && settingsCache.expiresAt > now) {
     return settingsCache.value;
   }
 
@@ -137,10 +137,13 @@ export async function getAdminNotificationSettings(): Promise<AdminNotificationS
   });
 
   const settings = parseSettings(result.rows[0]?.value);
-  settingsCache = {
-    value: settings,
-    expiresAt: now + settingsCacheMs,
-  };
+  settingsCache =
+    settingsCacheMs > 0
+      ? {
+          value: settings,
+          expiresAt: now + settingsCacheMs,
+        }
+      : null;
 
   return settings;
 }
@@ -181,10 +184,13 @@ export async function updateAdminNotificationSettings(
     args: [settingsKey, JSON.stringify(next), new Date().toISOString()],
   });
 
-  settingsCache = {
-    value: next,
-    expiresAt: Date.now() + settingsCacheMs,
-  };
+  settingsCache =
+    settingsCacheMs > 0
+      ? {
+          value: next,
+          expiresAt: Date.now() + settingsCacheMs,
+        }
+      : null;
 
   return next;
 }

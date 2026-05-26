@@ -9,6 +9,9 @@ import { defaultAboutImage, defaultHeroImage, imageBase } from "@/lib/constants/
 import { siteConfig } from "@/lib/constants/site";
 import { getKoreaDateString, getKoreaTimeString, isKoreaWeekend } from "@/lib/datetime/korea";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const spacePhotos = [
   {
     src: `${imageBase}/hongcheon-kkotsin-02.jpg`,
@@ -183,7 +186,10 @@ export default async function HomePage() {
 
       <section className="section gallery-runway">
         <div className="runway-head">
-          <h2>꽃신을 소개합니다</h2>
+          <h2>
+            꽃신을
+            <br className="mobile-only-break" /> 소개합니다
+          </h2>
         </div>
         <div className="runway-grid">
           {spacePhotos.map((photo, index) => (
