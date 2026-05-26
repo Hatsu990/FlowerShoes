@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { MenuOrderBoard } from "@/components/menu/menu-order-board";
 import { ReservationForm } from "@/components/reservation/reservation-form";
+import { PhoneInquiryButton } from "@/components/contact/phone-inquiry-button";
 import { getAdminNotificationSettings, type AdminNotificationSettings } from "@/lib/admin/settings";
 import { cafeMenu } from "@/lib/constants/menu";
 import { defaultAboutImage, defaultHeroImage, imageBase } from "@/lib/constants/gallery";
@@ -102,6 +103,7 @@ export default async function HomePage() {
         </div>
         <div className="top-nav-actions">
           <a href="#menu-board">메뉴</a>
+          <PhoneInquiryButton phone={adminSettings.phone} />
           <a className="primary" href="#reserve-cta">
             예약하기
           </a>
@@ -130,47 +132,63 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section visit-info-section">
-        <div className="visit-photo-grid">
-          <article className="visit-photo-panel location-panel">
-            <img
-              src={`${imageBase}/hongcheon-kkotsin-01.jpg`}
-              width={2048}
-              height={1152}
-              loading="lazy"
-              alt="홍천 꽃신 도로명 주소 위치 안내 사진"
-            />
-            <div className="visit-photo-copy">
-              <h3>위치</h3>
-              <p>{siteConfig.address}</p>
-            </div>
-          </article>
+      <section className="editorial-map-section" aria-label="위치 및 공간 안내">
+        <article className="map-feature location-panel">
+          <img
+            src={`${imageBase}/hongcheon-kkotsin-01.jpg`}
+            width={2048}
+            height={1152}
+            loading="lazy"
+            alt="홍천 꽃신 도로명 주소 위치 안내 사진"
+          />
+          <div>
+            <h2>위치</h2>
+            <p>{siteConfig.address}</p>
+          </div>
+        </article>
 
-          <article className="visit-photo-panel floor-guide-panel">
-            <img
-              src={`${imageBase}/hongcheon-kkotsin-12.jpg`}
-              width={2048}
-              height={1152}
-              loading="lazy"
-              alt="홍천 꽃신 층별 안내도"
-            />
-            <div className="visit-photo-copy">
-              <h3>층별 안내</h3>
+        <article className="map-feature floor-guide-panel">
+          <img
+            src={`${imageBase}/hongcheon-kkotsin-12.jpg`}
+            width={2048}
+            height={1152}
+            loading="lazy"
+            alt="홍천 꽃신 층별 안내도"
+          />
+          <div>
+            <h2>층별 안내</h2>
+            <p>1층 마을카페 꽃신</p>
+          </div>
+        </article>
+      </section>
+
+      <section id="intro" className="section story-section">
+        <div className="story-layout">
+          <div className="story-title">
+            <h2>홍천 신장대리에 피어난 작은 쉼터</h2>
+          </div>
+          <div className="story-body">
+            <figure className="story-photo">
+              <img src={aboutPhoto} width={1536} height={2048} loading="lazy" alt="꽃신이라는 이름을 떠올리게 하는 작은 장식" />
+            </figure>
+            <div className="story-copy">
+              <p>꽃피는 신장대리에서, 잠시 쉬어갈 수 있는 공간을 만들고 싶었습니다.</p>
+              <p>꽃신은 홍천의 조용한 풍경과 따뜻한 차 한잔의 여유를 함께 담아낸 전통차 카페입니다.</p>
+              <p>은은하게 퍼지는 차향, 편안한 우드톤의 공간, 그리고 천천히 머물러가기 좋은 분위기 속에서 복잡한 하루를 잠시 내려놓고 쉬어가실 수 있습니다.</p>
+              <p>직접 준비한 전통차와 디저트, 그리고 홍천의 계절감을 함께 느껴보세요.</p>
             </div>
-          </article>
+          </div>
         </div>
       </section>
 
-      <section id="intro" className="section with-grid">
-        <div className="section-head immersive">
-          <p>Space</p>
+      <section className="section gallery-runway">
+        <div className="runway-head">
           <h2>꽃신을 소개합니다</h2>
         </div>
-        <div className="image-grid image-grid-large visual-mosaic">
-          {spacePhotos.map((photo) => (
-            <article className={photo.className} key={photo.src}>
+        <div className="runway-grid">
+          {spacePhotos.map((photo, index) => (
+            <article className={`runway-photo photo-${index + 1} ${photo.className}`} key={photo.src}>
               <img
-                className="content-image"
                 src={photo.src}
                 width={2048}
                 height={1152}
@@ -182,62 +200,20 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section space-intro-section">
-        <div className="section-head immersive">
-          <p>About</p>
-          <h2>홍천 신장대리에 피어난 작은 쉼터</h2>
-        </div>
-        <div className="space-intro-layout">
-          <figure className="space-intro-photo">
-            <img src={aboutPhoto} width={1536} height={2048} loading="lazy" alt="꽃신이라는 이름을 떠올리게 하는 작은 장식" />
-          </figure>
-          <div className="space-intro-copy">
-            <p>
-              꽃피는 신장대리에서,
-              <br />
-              잠시 쉬어갈 수 있는 공간을 만들고 싶었습니다.
-            </p>
-            <p>
-              꽃신은 홍천의 조용한 풍경과
-              <br />
-              따뜻한 차 한잔의 여유를 함께 담아낸 전통차 카페입니다.
-            </p>
-            <p>
-              은은하게 퍼지는 차향,
-              <br />
-              편안한 우드톤의 공간,
-              <br />
-              그리고 천천히 머물러가기 좋은 분위기 속에서
-              <br />
-              복잡한 하루를 잠시 내려놓고 쉬어가실 수 있습니다.
-            </p>
-            <p>
-              직접 준비한 전통차와 디저트,
-              <br />
-              그리고 홍천의 계절감을 함께 느껴보세요.
-            </p>
-            <p>
-              혼자 조용히 머물러도 좋고,
-              <br />
-              소중한 사람과 편하게 이야기를 나누기에도 좋은 공간이 되기를 바랍니다.
-            </p>
+      <section id="reserve-cta" className="section order-section">
+        <div id="menu-board" className="order-anchor" />
+        <div className="order-workspace">
+          <div className="order-menu-panel">
+            <div className="menu-board-title">
+              <h2>MENU</h2>
+            </div>
+            <div className="menu-layout">
+              <MenuOrderBoard categories={visibleMenu} soldOutMenus={adminSettings.soldOutMenus} />
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section id="menu-board" className="section menu-board">
-        <div className="menu-board-title">
-          <h2>MENU</h2>
-        </div>
-
-        <div className="menu-layout">
-          <MenuOrderBoard categories={visibleMenu} soldOutMenus={adminSettings.soldOutMenus} />
-        </div>
-      </section>
-
-      <section id="reserve-cta" className="section reserve-cta">
-        <div className="cta-layout">
-          <ReservationForm compact title="방문 예약하기" />
+          <div className="order-reserve-panel">
+            <ReservationForm compact title="" />
+          </div>
         </div>
       </section>
 

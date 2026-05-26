@@ -3,6 +3,7 @@ import { defaultAboutImage, defaultHeroImage, galleryImages } from "@/lib/consta
 import { ADMIN_SETTINGS_TABLE_SQL } from "@/lib/db/schema";
 
 export type NotificationMode = "sms" | "app" | "both";
+export const defaultOwnerPhone = "01043303764";
 
 export interface AdminNotificationSettings {
   ownerName: string;
@@ -29,7 +30,7 @@ let settingsCache: { value: AdminNotificationSettings; expiresAt: number } | nul
 
 const defaultSettings: AdminNotificationSettings = {
   ownerName: "",
-  phone: "",
+  phone: defaultOwnerPhone,
   notificationMode: "app",
   orderSoundLabel: "새 주문이 들어왔습니다",
   weekdayOpen: "10:00",
@@ -89,7 +90,7 @@ function parseSettings(value: unknown): AdminNotificationSettings {
     const parsed = JSON.parse(value) as Partial<AdminNotificationSettings>;
     return {
       ownerName: typeof parsed.ownerName === "string" ? parsed.ownerName : "",
-      phone: typeof parsed.phone === "string" ? parsed.phone : "",
+      phone: typeof parsed.phone === "string" && parsed.phone.trim() ? parsed.phone.trim() : defaultOwnerPhone,
       notificationMode:
         parsed.notificationMode === "sms" || parsed.notificationMode === "app" || parsed.notificationMode === "both"
           ? parsed.notificationMode
@@ -151,7 +152,7 @@ export async function updateAdminNotificationSettings(
 
   const next: AdminNotificationSettings = {
     ownerName: String(input.ownerName ?? "").trim().slice(0, 40),
-    phone: String(input.phone ?? "").trim().slice(0, 30),
+    phone: String(input.phone ?? defaultOwnerPhone).trim().slice(0, 30) || defaultOwnerPhone,
     notificationMode:
       input.notificationMode === "sms" || input.notificationMode === "app" || input.notificationMode === "both"
         ? input.notificationMode
