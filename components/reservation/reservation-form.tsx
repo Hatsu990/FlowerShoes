@@ -363,7 +363,7 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
           ))}
         </fieldset>
 
-        <section className="menu-picker" aria-label="장바구니">
+        <section id="reservation-cart" className="menu-picker" aria-label="장바구니">
           <div className="menu-picker-head">
             <strong>장바구니</strong>
             <span>{selectedMenuTotalCount > 0 ? `${selectedMenuTotalCount}잔 담김` : "비어 있음"}</span>

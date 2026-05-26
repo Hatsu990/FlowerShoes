@@ -140,8 +140,13 @@ export default async function HomePage() {
         <div className="order-workspace">
           <div className="order-menu-panel">
             <div className="menu-board-title">
-              <h2>MENU</h2>
-              <p>HOT 또는 ICE를 누르면 예약 장바구니에 담깁니다.</p>
+              <div>
+                <h2>MENU</h2>
+                <p>HOT 또는 ICE를 누르면 예약 장바구니에 담깁니다.</p>
+              </div>
+              <a className="mobile-cart-jump" href="#reservation-cart">
+                장바구니
+              </a>
             </div>
             <div className="menu-layout">
               <MenuOrderBoard categories={visibleMenu} soldOutMenus={adminSettings.soldOutMenus} />
