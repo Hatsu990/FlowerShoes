@@ -760,6 +760,27 @@ figcaption {
   display: none;
 }
 
+.menu-category-tabs {
+  display: none;
+}
+
+.menu-add-toast {
+  position: sticky;
+  top: 5.4rem;
+  z-index: 8;
+  justify-self: center;
+  width: min(100%, 520px);
+  border: 1px solid rgba(255, 250, 241, 0.5);
+  border-radius: 999px;
+  background: rgba(31, 71, 53, 0.96);
+  color: #fffaf1;
+  padding: 0.78rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-align: center;
+  box-shadow: 0 18px 42px rgba(31, 71, 53, 0.26);
+}
+
 .menu-category-column {
   display: grid;
   align-content: start;
@@ -828,6 +849,9 @@ figcaption {
 }
 
 .menu-add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   border: 1px solid rgba(49, 95, 73, 0.22);
   border-radius: 999px;
   background: #fffdfa;
@@ -2899,6 +2923,14 @@ figcaption {
   color: var(--accent-strong);
 }
 
+.order-menu-panel .menu-board-title p {
+  margin: 0.4rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  font-weight: 800;
+  word-break: keep-all;
+}
+
 .order-menu-panel .menu-layout {
   width: 100%;
   border: 0;
@@ -3111,6 +3143,55 @@ figcaption {
 
   .story-photo {
     aspect-ratio: 4 / 3;
+  }
+
+  .menu-categories-mobile {
+    gap: 0.8rem;
+  }
+
+  .menu-category-tabs {
+    display: flex;
+    gap: 0.52rem;
+    margin: -0.15rem -0.2rem 0;
+    padding: 0.15rem 0.2rem 0.35rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .menu-category-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .menu-category-tabs button {
+    flex: 0 0 auto;
+    min-width: 82px;
+    min-height: 48px;
+    border: 1px solid rgba(49, 95, 73, 0.18);
+    border-radius: 14px;
+    background: rgba(255, 252, 245, 0.86);
+    color: var(--text-main);
+    padding: 0.66rem 0.82rem;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 900;
+    scroll-snap-align: start;
+    box-shadow: 0 8px 20px rgba(49, 95, 73, 0.08);
+  }
+
+  .menu-category-tabs button.selected {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 12px 26px rgba(31, 71, 53, 0.2);
+  }
+
+  .menu-add-toast {
+    top: 4.8rem;
+    border-radius: 18px;
+    font-size: 0.86rem;
+    line-height: 1.35;
   }
 
   .runway-grid {

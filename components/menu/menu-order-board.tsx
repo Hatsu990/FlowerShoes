@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import type { CafeMenuCategory, CafeMenuItem } from "@/lib/constants/menu";
 
 interface MenuOrderBoardProps {
@@ -48,7 +50,26 @@ function addMenuToCart(label: string) {
   );
 }
 
-function MenuCategoryList({ categories, soldOutMenus }: MenuOrderBoardProps) {
+function getSubjectParticle(value: string) {
+  const lastChar = value.trim().replace(/\s+(HOT|ICE)$/i, "").at(-1);
+  if (!lastChar) {
+    return "가";
+  }
+
+  const code = lastChar.charCodeAt(0);
+  if (code < 0xac00 || code > 0xd7a3) {
+    return "가";
+  }
+
+  return (code - 0xac00) % 28 === 0 ? "가" : "이";
+}
+
+function MenuCategoryList({
+  categories,
+  selectedMenus,
+  showToast,
+  soldOutMenus,
+}: MenuOrderBoardProps & { selectedMenus: Record<string, number>; showToast: (message: string) => void }) {
   return (
     <>
       {categories.map((category) => (
@@ -72,7 +93,11 @@ function MenuCategoryList({ categories, soldOutMenus }: MenuOrderBoardProps) {
                             <button
                               type="button"
                               className="menu-add-button"
-                              onClick={() => addMenuToCart(selectedLabel)}
+                              aria-pressed={Boolean(selectedMenus[selectedLabel])}
+                              onClick={() => {
+                                addMenuToCart(selectedLabel);
+                                showToast(`장바구니에 ${selectedLabel}${getSubjectParticle(selectedLabel)} 추가되었습니다!`);
+                              }}
                               key={selectedLabel}
                             >
                               {variant.label ? `${variant.label} ` : ""}
@@ -92,21 +117,83 @@ function MenuCategoryList({ categories, soldOutMenus }: MenuOrderBoardProps) {
 }
 
 export function MenuOrderBoard({ categories, soldOutMenus }: MenuOrderBoardProps) {
+  const [selectedMenus, setSelectedMenus] = useState<Record<string, number>>({});
+  const [activeCategory, setActiveCategory] = useState(categories[0]?.category ?? "");
+  const [toast, setToast] = useState({ id: 0, message: "" });
   const columns = [
     categories.filter((_, index) => index % 2 === 0),
     categories.filter((_, index) => index % 2 === 1),
   ];
+  const activeMobileCategory = categories.find((category) => category.category === activeCategory) ?? categories[0];
+
+  useEffect(() => {
+    function updateSelectedMenus(event: Event) {
+      const customEvent = event as CustomEvent<{ selectedMenus?: Record<string, number> }>;
+      setSelectedMenus(customEvent.detail?.selectedMenus ?? {});
+    }
+
+    window.addEventListener("flower-shoes:cart-updated", updateSelectedMenus);
+    return () => window.removeEventListener("flower-shoes:cart-updated", updateSelectedMenus);
+  }, []);
+
+  useEffect(() => {
+    if (categories.length > 0 && !categories.some((category) => category.category === activeCategory)) {
+      setActiveCategory(categories[0].category);
+    }
+  }, [activeCategory, categories]);
+
+  useEffect(() => {
+    if (!toast.message) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setToast((prev) => ({ ...prev, message: "" })), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [toast.id, toast.message]);
+
+  function showToast(message: string) {
+    setToast((prev) => ({ id: prev.id + 1, message }));
+  }
 
   return (
     <>
+      {toast.message && (
+        <div className="menu-add-toast" role="status" aria-live="polite" key={toast.id}>
+          {toast.message}
+        </div>
+      )}
       <div className="menu-categories-mobile">
-        <MenuCategoryList categories={categories} soldOutMenus={soldOutMenus} />
+        <div className="menu-category-tabs" aria-label="메뉴 장르 선택">
+          {categories.map((category) => (
+            <button
+              type="button"
+              className={category.category === activeMobileCategory?.category ? "selected" : ""}
+              onClick={() => setActiveCategory(category.category)}
+              key={category.category}
+            >
+              {category.category}
+            </button>
+          ))}
+        </div>
+        {activeMobileCategory && (
+          <MenuCategoryList
+            categories={[activeMobileCategory]}
+            selectedMenus={selectedMenus}
+            showToast={showToast}
+            soldOutMenus={soldOutMenus}
+          />
+        )}
       </div>
 
       <div className="menu-categories">
         {columns.map((column, columnIndex) => (
           <div className="menu-category-column" key={columnIndex}>
-            <MenuCategoryList categories={column} soldOutMenus={soldOutMenus} />
+            <MenuCategoryList
+              categories={column}
+              selectedMenus={selectedMenus}
+              showToast={showToast}
+              soldOutMenus={soldOutMenus}
+            />
           </div>
         ))}
       </div>

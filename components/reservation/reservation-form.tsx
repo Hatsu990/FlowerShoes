@@ -186,12 +186,26 @@ export function ReservationForm({ title = "예약 요청", compact = false }: Re
   }, [form.time, timeOptions]);
 
   useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("flower-shoes:cart-updated", {
+        detail: { selectedMenus: form.selectedMenus },
+      }),
+    );
+  }, [form.selectedMenus]);
+
+  useEffect(() => {
     function addMenuFromBoard(event: Event) {
       const customEvent = event as CustomEvent<{ label?: string }>;
       const label = customEvent.detail?.label;
 
       if (label) {
-        updateMenuQuantity(label, 1);
+        setForm((prev) => ({
+          ...prev,
+          selectedMenus: {
+            ...prev.selectedMenus,
+            [label]: Math.min(99, (prev.selectedMenus[label] ?? 0) + 1),
+          },
+        }));
       }
     }
 

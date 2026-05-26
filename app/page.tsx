@@ -102,7 +102,7 @@ export default async function HomePage() {
       <main id="main-content" className="landing">
       <header className="top-nav">
         <div className="brand">
-          <span>{siteConfig.name}</span>
+          <span>CAFE 홍천 꽃신</span>
         </div>
         <div className="top-nav-actions">
           <a href="#menu-board">메뉴</a>
@@ -124,7 +124,7 @@ export default async function HomePage() {
         />
         <div className="hero-copy">
           <div className={`business-status ${businessStatus.open ? "open" : "closed"}`}>
-            <strong>{businessStatus.label}</strong>
+            <strong>CAFE {businessStatus.label}</strong>
             <span>{businessStatus.detail}</span>
           </div>
           <h1>
@@ -132,6 +132,24 @@ export default async function HomePage() {
             <br />
             꽃신에서 쉬어가세요
           </h1>
+        </div>
+      </section>
+
+      <section id="reserve-cta" className="section order-section">
+        <div id="menu-board" className="order-anchor" />
+        <div className="order-workspace">
+          <div className="order-menu-panel">
+            <div className="menu-board-title">
+              <h2>MENU</h2>
+              <p>HOT 또는 ICE를 누르면 예약 장바구니에 담깁니다.</p>
+            </div>
+            <div className="menu-layout">
+              <MenuOrderBoard categories={visibleMenu} soldOutMenus={adminSettings.soldOutMenus} />
+            </div>
+          </div>
+          <div className="order-reserve-panel">
+            <ReservationForm compact title="" />
+          </div>
         </div>
       </section>
 
@@ -165,25 +183,6 @@ export default async function HomePage() {
         </article>
       </section>
 
-      <section id="intro" className="section story-section">
-        <div className="story-layout">
-          <div className="story-title">
-            <h2>홍천 신장대리에 피어난 작은 쉼터</h2>
-          </div>
-          <div className="story-body">
-            <figure className="story-photo">
-              <img src={aboutPhoto} width={1536} height={2048} loading="lazy" alt="꽃신이라는 이름을 떠올리게 하는 작은 장식" />
-            </figure>
-            <div className="story-copy">
-              <p>꽃피는 신장대리에서, 잠시 쉬어갈 수 있는 공간을 만들고 싶었습니다.</p>
-              <p>꽃신은 홍천의 조용한 풍경과 따뜻한 차 한잔의 여유를 함께 담아낸 전통차 카페입니다.</p>
-              <p>은은하게 퍼지는 차향, 편안한 우드톤의 공간, 그리고 천천히 머물러가기 좋은 분위기 속에서 복잡한 하루를 잠시 내려놓고 쉬어가실 수 있습니다.</p>
-              <p>직접 준비한 전통차와 디저트, 그리고 홍천의 계절감을 함께 느껴보세요.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section gallery-runway">
         <div className="runway-head">
           <h2>
@@ -206,19 +205,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="reserve-cta" className="section order-section">
-        <div id="menu-board" className="order-anchor" />
-        <div className="order-workspace">
-          <div className="order-menu-panel">
-            <div className="menu-board-title">
-              <h2>MENU</h2>
-            </div>
-            <div className="menu-layout">
-              <MenuOrderBoard categories={visibleMenu} soldOutMenus={adminSettings.soldOutMenus} />
-            </div>
+      <section id="intro" className="section story-section">
+        <div className="story-layout">
+          <div className="story-title">
+            <h2>홍천 신장대리에 피어난 작은 쉼터</h2>
           </div>
-          <div className="order-reserve-panel">
-            <ReservationForm compact title="" />
+          <div className="story-body">
+            <figure className="story-photo">
+              <img src={aboutPhoto} width={1536} height={2048} loading="lazy" alt="꽃신이라는 이름을 떠올리게 하는 작은 장식" />
+            </figure>
+            <div className="story-copy">
+              <p>꽃피는 신장대리에서, 잠시 쉬어갈 수 있는 공간을 만들고 싶었습니다.</p>
+              <p>꽃신은 홍천의 조용한 풍경과 따뜻한 차 한잔의 여유를 함께 담아낸 전통차 카페입니다.</p>
+              <p>은은하게 퍼지는 차향, 편안한 우드톤의 공간, 그리고 천천히 머물러가기 좋은 분위기 속에서 복잡한 하루를 잠시 내려놓고 쉬어가실 수 있습니다.</p>
+              <p>직접 준비한 전통차와 디저트, 그리고 홍천의 계절감을 함께 느껴보세요.</p>
+            </div>
           </div>
         </div>
       </section>
