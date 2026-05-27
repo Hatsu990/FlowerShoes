@@ -2646,6 +2646,8 @@ figcaption {
 }
 
 .editorial-map-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 760px;
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   min-height: 380px;
@@ -2712,6 +2714,8 @@ figcaption {
 }
 
 .story-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 760px;
   position: relative;
   padding-top: clamp(3.2rem, 6vw, 5.5rem);
   padding-bottom: clamp(3.2rem, 6vw, 5.5rem);
@@ -2779,6 +2783,8 @@ figcaption {
 }
 
 .gallery-runway {
+  content-visibility: auto;
+  contain-intrinsic-size: 920px;
   overflow: hidden;
   background: #1f241f;
   color: #fffaf1;

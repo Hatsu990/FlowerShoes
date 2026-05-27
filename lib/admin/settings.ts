@@ -23,7 +23,7 @@ export interface AdminNotificationSettings {
 }
 
 const settingsKey = "notification";
-const settingsCacheMs = 0;
+const settingsCacheMs = 5_000;
 
 let settingsInitPromise: Promise<void> | null = null;
 let settingsCache: { value: AdminNotificationSettings; expiresAt: number } | null = null;

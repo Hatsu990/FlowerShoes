@@ -19,11 +19,11 @@ export function AdminNav({ active }: AdminNavProps) {
   return (
     <div className="admin-header-actions">
       {adminNavItems.map((item) => (
-        <Link className={active === item.key ? "active" : undefined} href={item.href} key={item.key}>
+        <Link className={active === item.key ? "active" : undefined} href={item.href} key={item.key} prefetch>
           {item.label}
         </Link>
       ))}
-      <Link className="home-link" href="/">
+      <Link className="home-link" href="/" prefetch>
         홈으로
       </Link>
       <form action={logoutAdmin}>
